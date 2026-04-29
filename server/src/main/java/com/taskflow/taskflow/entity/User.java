@@ -41,17 +41,23 @@ public class User {
     @UpdateTimestamp
     private Date updatedAt;
 
+    // Using FetchType.EAGER as roles are needed immediately
+    // defining the relationship of the user_role join table to ROLE
+    // NOTE: This relationship does NOT need to be re-declared in ROLE entity
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
-            name = "user_role",
-            joinColumns = @JoinColumn(name = "user_id"),
+            name = "user_role", // table name
+            joinColumns = @JoinColumn(name = "user_id"), //
             inverseJoinColumns = @JoinColumn(name = "role_id")
     )
+
+    // Set of user roles
     private Set<Role> roles;
 
     // inverse mapping to `teams`
-    @ManyToMany(mappedBy = "team_member")
-    // required to avoid infinite loop of mappings
+    // value of mappedBy MUST match the variable name in TEAMS entity
+    // @JsonIgnore required to avoid infinite loop of mappings
+    @ManyToMany(mappedBy = "members")
     @JsonIgnore
     private Set<Team> teams;
 

@@ -10,5 +10,6 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     //... Handles JPA database methods
 
     // Add custom logic to handle find by email
+    // Needed in order to check is an email already exists
     Optional<User> findByEmail(String email);
 }

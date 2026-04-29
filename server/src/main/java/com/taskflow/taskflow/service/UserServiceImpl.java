@@ -65,12 +65,14 @@ public class UserServiceImpl implements UserService {
         return theUser;
     }
 
-//    @Override
-//    public User save(User user) {
-//        user.setPassword(passwordEncoder.encode(user.getPassword()));
-//        return userRepository.save(user);
-//    }
+    // NOTE: Older method, we need to save ROLE on USER create
+    //    @Override
+    //    public User save(User user) {
+    //        user.setPassword(passwordEncoder.encode(user.getPassword()));
+    //        return userRepository.save(user);
+    //    }
 
+    // Creates a new user and sets the role (default is ROLE_MEMBER)
     @Transactional
     @Override
     public User save(User user) {

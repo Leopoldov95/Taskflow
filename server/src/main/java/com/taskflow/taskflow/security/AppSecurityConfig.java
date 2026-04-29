@@ -22,15 +22,12 @@ public class AppSecurityConfig {
 
         JdbcUserDetailsManager jdbcUserDetailsManager = new JdbcUserDetailsManager(dataSource);
 
-        // Use BCryptPasswordEncoder to hash passwords before storing them
-        //TODO below method does not exist
-       // jdbcUserDetailsManager.setPasswordEncoder(new BCryptPasswordEncoder());
-
-        // define query to retrieve a user by username
+        // define query to retrieve a user by username, we will use email as username
         jdbcUserDetailsManager.setUsersByUsernameQuery(
                 "select email, password, is_active from users where email=?");
 
         // define query to retrieve the authorities/roles by username
+        // must use a JOIN query as the user_role is found in a separate table
         jdbcUserDetailsManager.setAuthoritiesByUsernameQuery(
                 "SELECT u.email, r.role\n" +
                         "FROM roles r\n" +

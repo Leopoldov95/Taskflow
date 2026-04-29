@@ -46,7 +46,7 @@ public class Team {
     @JoinColumn(name = "created_by", nullable = false)
     private User createdBy;
 
-    // 👥 Members (Many-to-Many via team_member)
+    // Members (Many-to-Many via team_member)
     @ManyToMany
     // Looks like joins `teams` id on `team_member` team_id column
     @JoinTable(
@@ -54,6 +54,8 @@ public class Team {
             joinColumns = @JoinColumn(name = "team_id"),
             inverseJoinColumns = @JoinColumn(name = "user_id")
     )
+
+    // name for the team members set
     private Set<User> members;
 
     // Constructor
