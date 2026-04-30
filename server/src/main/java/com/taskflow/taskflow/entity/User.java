@@ -30,8 +30,8 @@ public class User {
     @Column(name="password")
     private String password;
 
-    @Column(name="is_active", insertable = false)
-    private boolean isActive;
+    @Column(name="is_active")
+    private boolean isActive = true; // default value for User's
 
     @Column(name="created_at")
     @CreationTimestamp

@@ -6,6 +6,8 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.factory.PasswordEncoderFactories;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
@@ -48,7 +50,7 @@ public class AppSecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/users").hasRole("MEMBER")
                         .requestMatchers(HttpMethod.GET, "/api/users/**").hasRole("MEMBER")
                         .requestMatchers(HttpMethod.POST, "/api/users").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/api/users").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PATCH, "/api/users/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/users/**").hasRole("ADMIN")
                         // Team routes
                         .requestMatchers(HttpMethod.GET, "/api/teams").hasRole("MEMBER")
@@ -63,7 +65,8 @@ public class AppSecurityConfig {
                         .requestMatchers(HttpMethod.PUT, "/api/projects").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/projects/**").hasRole("ADMIN")
                         // Task routes
-                        .requestMatchers(HttpMethod.GET, "/error").hasRole("MEMBER")
+                        // Fallback routes
+                        .anyRequest().permitAll()
         );
 
         // use HTTP Basic authentication
@@ -77,8 +80,10 @@ public class AppSecurityConfig {
         return http.build();
     }
 
+    // updated method to allow use of {bcrypt} as stored value in User DB
     @Bean
-    public BCryptPasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
+    public PasswordEncoder passwordEncoder() {
+        return PasswordEncoderFactories.createDelegatingPasswordEncoder();
+        //return new BCryptPasswordEncoder();
     }
 }

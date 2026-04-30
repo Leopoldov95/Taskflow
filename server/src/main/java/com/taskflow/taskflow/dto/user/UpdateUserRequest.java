@@ -1,14 +1,9 @@
 package com.taskflow.taskflow.dto.user;
 
-// DTO to handle the user creation request from the client side
-// prevents client or API from sending properties like id, isActive, role, etc
-public class CreateUserRequest {
+public class UpdateUserRequest {
     private String firstName;
     private String lastName;
     private String email;
-    private String password;
-
-    public CreateUserRequest(){}
 
     public String getFirstName() {
         return firstName;
@@ -33,13 +28,4 @@ public class CreateUserRequest {
     public void setEmail(String email) {
         this.email = email;
     }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
 }
