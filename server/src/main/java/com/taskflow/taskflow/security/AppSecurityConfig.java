@@ -3,87 +3,94 @@ package com.taskflow.taskflow.security;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.config.Customizer;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.JdbcUserDetailsManager;
-import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
-
-import javax.sql.DataSource;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
+@EnableWebSecurity
 public class AppSecurityConfig {
 
-    // add support for JDBC ... no more hardcoded users :-)
+    private final JwtAuthFilter jwtAuthFilter;
+    private final UserDetailsServiceImpl userDetailsService;
 
-    @Bean
-    public UserDetailsManager userDetailsManager(DataSource dataSource) {
-
-        JdbcUserDetailsManager jdbcUserDetailsManager = new JdbcUserDetailsManager(dataSource);
-
-        // define query to retrieve a user by username, we will use email as username
-        jdbcUserDetailsManager.setUsersByUsernameQuery(
-                "select email, password, is_active from users where email=?");
-
-        // define query to retrieve the authorities/roles by username
-        // must use a JOIN query as the user_role is found in a separate table
-        jdbcUserDetailsManager.setAuthoritiesByUsernameQuery(
-                "SELECT u.email, r.role\n" +
-                        "FROM roles r\n" +
-                        "JOIN user_role ur ON r.id = ur.role_id\n" +
-                        "JOIN users u ON u.id = ur.user_id\n" +
-                        "WHERE u.email = ?");
-
-        return jdbcUserDetailsManager;
+    public AppSecurityConfig(JwtAuthFilter jwtAuthFilter, UserDetailsServiceImpl userDetailsService) {
+        this.jwtAuthFilter = jwtAuthFilter;
+        this.userDetailsService = userDetailsService;
     }
 
-    // restricting access based on roles
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http.csrf(csrf -> csrf.disable())
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+        )
+        .authorizeHttpRequests(auth -> auth
+                // Auth routes — public
+                .requestMatchers("/api/auth/**").permitAll()
 
-        http.authorizeHttpRequests(configurer ->
-                configurer
-                        // User Routes
-                        .requestMatchers(HttpMethod.GET, "/api/users").hasRole("MEMBER")
-                        .requestMatchers(HttpMethod.GET, "/api/users/**").hasRole("MEMBER")
-                        .requestMatchers(HttpMethod.POST, "/api/users").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.PATCH, "/api/users/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/api/users/**").hasRole("ADMIN")
-                        // Team routes
-                        .requestMatchers(HttpMethod.GET, "/api/teams").hasRole("MEMBER")
-                        .requestMatchers(HttpMethod.GET, "/api/teams/**").hasRole("MEMBER")
-                        .requestMatchers(HttpMethod.POST, "/api/teams").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/api/teams").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/api/teams/**").hasRole("ADMIN")
-                        // Project routes
-                        .requestMatchers(HttpMethod.GET, "/api/projects").hasRole("MEMBER")
-                        .requestMatchers(HttpMethod.GET, "/api/projects/**").hasRole("MEMBER")
-                        .requestMatchers(HttpMethod.POST, "/api/projects").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/api/projects").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/api/projects/**").hasRole("ADMIN")
-                        // Task routes
-                        // Fallback routes
-                        .anyRequest().permitAll()
-        );
+                // Me routes — any authenticated user
+                .requestMatchers("/api/me/**").authenticated()
 
-        // use HTTP Basic authentication
-        http.httpBasic(Customizer.withDefaults());
+                // User routes — admin only
+                .requestMatchers("/api/users").hasRole("ADMIN")
+                .requestMatchers("/api/users/**").hasRole("ADMIN")
 
-        // disable CSRF
-        // in general, not required for stateless REST APIs that use POST PUT, DELETE, and/or PATCH
+                // Team routes
+                .requestMatchers(HttpMethod.GET, "/api/teams").authenticated()
+                .requestMatchers(HttpMethod.GET, "/api/teams/**").authenticated()
+                .requestMatchers(HttpMethod.POST, "/api/teams/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.PATCH, "/api/teams/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/teams/**").hasRole("ADMIN")
 
-        http.csrf(csrf -> csrf.disable());
+                // Project routes
+                .requestMatchers(HttpMethod.GET, "/api/projects/**").authenticated()
+                .requestMatchers(HttpMethod.POST, "/api/projects/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.PATCH, "/api/projects/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/projects/**").hasRole("ADMIN")
+
+                // Everything else requires authentication
+                .anyRequest().authenticated()
+        )
+                // handle unauthorized access
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            System.out.println("AUTH ENTRY POINT HIT: " + authException.getMessage());
+                            response.sendError(403, authException.getMessage());
+                        })
+                        .accessDeniedHandler((request, response, accessDeniedException) -> {
+                            System.out.println("ACCESS DENIED: " + accessDeniedException.getMessage());
+                            response.sendError(403, accessDeniedException.getMessage());
+                        })
+                )
+                .authenticationProvider(authenticationProvider())
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class); // 👈 plug in our JWT filter
 
         return http.build();
     }
 
-    // updated method to allow use of {bcrypt} as stored value in User DB
+    @Bean
+    public AuthenticationProvider authenticationProvider() {
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider(userDetailsService);
+//        provider.setUserDetailsService(userDetailsService);
+        provider.setPasswordEncoder(passwordEncoder());
+        return provider;
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+        return config.getAuthenticationManager();
+    }
+
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return PasswordEncoderFactories.createDelegatingPasswordEncoder();
-        //return new BCryptPasswordEncoder();
+        return new BCryptPasswordEncoder();
     }
 }

@@ -25,6 +25,7 @@ public class UserRestController {
     // expose "/users" and get a list of users
     @GetMapping("/users")
     public List<UserResponse> getUsers() {
+        System.out.println("Fetching users...");
         return userService.findAll();
     }
 

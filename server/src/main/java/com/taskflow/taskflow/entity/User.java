@@ -3,15 +3,20 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 // TODO ~ find a better way to organize this, like in TS having a types folder
 
 @Entity
 @Table(name="users")
-public class User {
+public class User implements UserDetails {
     // define fields
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -60,6 +65,42 @@ public class User {
     @ManyToMany(mappedBy = "members")
     @JsonIgnore
     private Set<Team> teams;
+
+    // UserDetails methods
+
+    // required for setup
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return roles.stream()
+                .map(role -> new SimpleGrantedAuthority(role.getName()))
+                .collect(Collectors.toList());
+    }
+
+    // use email as identifier
+    @Override
+    public String getUsername() {
+        return email;
+    }
+
+    @Override
+    @JsonIgnore
+    public String getPassword() {
+        return password;
+    }
+
+    // Below three methods required and default to true
+    @Override
+    public boolean isAccountNonExpired() { return true; }
+
+    @Override
+    public boolean isAccountNonLocked() { return true; }
+
+    @Override
+    public boolean isCredentialsNonExpired() { return true; }
+
+    // ties to my isActive column in DB
+    @Override
+    public boolean isEnabled() { return isActive; }
 
     // define constructors
     public User() {
@@ -129,10 +170,6 @@ public class User {
 
     public void setUpdatedAt(Date updatedAt) {
         this.updatedAt = updatedAt;
-    }
-
-    public String getPassword() {
-        return password;
     }
 
     public void setPassword(String password) {
