@@ -9,6 +9,8 @@ import com.taskflow.taskflow.dto.user.UserResponse;
 import com.taskflow.taskflow.entity.Role;
 import com.taskflow.taskflow.entity.User;
 import com.taskflow.taskflow.entity.enums.RoleType;
+import com.taskflow.taskflow.exception.BadRequestException;
+import com.taskflow.taskflow.exception.ResourceNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -72,27 +74,6 @@ public class UserServiceImpl implements UserService {
         return mapToResponse(theUser);
     }
 
-    //TODO ~ implement logic to find by email
-
-    @Override
-    public User findByEmail(String email) {
-        Optional<User> user = userRepository.findByEmail(email);
-        User theUser = null;
-        if (user.isPresent()) {
-            theUser = user.get();
-        } else {
-            throw new RuntimeException("Did not find user with email: " + email);
-        }
-
-        return theUser;
-    }
-
-    // NOTE: Older method, we need to save ROLE on USER create
-    //    @Override
-    //    public User save(User user) {
-    //        user.setPassword(passwordEncoder.encode(user.getPassword()));
-    //        return userRepository.save(user);
-    //    }
 
     // Creates a new user and sets the role (default is ROLE_MEMBER)
     @Transactional
@@ -145,14 +126,14 @@ public class UserServiceImpl implements UserService {
     // Update User password
     @Override
     public void updateUserPassword(int id, UpdateUserPasswordRequest request) {
-        User user = userRepository.findById(id).orElseThrow(() -> new RuntimeException("Did not find user with id: " + id));
+        User user = userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Did not find user with id: " + id));
 
         if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
-            throw new RuntimeException("Current password is not correct");
+            throw new BadRequestException("Current password is not correct");
         }
 
         if(!request.getNewPassword().equals(request.getConfirmPassword())) {
-            throw new RuntimeException("Passwords do not match");
+            throw new BadRequestException("Passwords do not match");
         }
 
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));

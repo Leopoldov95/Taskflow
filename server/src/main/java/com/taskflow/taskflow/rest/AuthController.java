@@ -29,4 +29,11 @@ public class AuthController {
     public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest request) {
         return ResponseEntity.ok(authService.login(request));
     }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout() {
+        // JWT is stateless — actual logout is handled client side
+        // This endpoint exists for convention and future use
+        return ResponseEntity.noContent().build();
+    }
 }

@@ -57,3 +57,6 @@ build/
 ### VS Code ###
 .vscode/
 *.todo.txt
+
+### App Files ###
+/server/**/application.properties

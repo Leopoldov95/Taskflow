@@ -25,7 +25,6 @@ public class UserRestController {
     // expose "/users" and get a list of users
     @GetMapping("/users")
     public List<UserResponse> getUsers() {
-        System.out.println("Fetching users...");
         return userService.findAll();
     }
 
@@ -49,24 +48,7 @@ public class UserRestController {
         return dbUser;
     }
 
-    // Update (PATCH) an existing user field
-    @PatchMapping("/users/{userId}")
-    public ResponseEntity<UserResponse> updateUser(
-            @PathVariable int userId,
-            @RequestBody UpdateUserRequest request) {
-        UserResponse dbUser = userService.updateUser(userId, request);
-        return ResponseEntity.ok(dbUser);
-    }
-
-    // Update User password
-    @PatchMapping("/users/{userId}/password")
-    public ResponseEntity<UserResponse> updateUserPassword(
-            @PathVariable int userId,
-            @RequestBody UpdateUserPasswordRequest request
-    ) {
-        userService.updateUserPassword(userId, request);
-        return ResponseEntity.noContent().build();
-    }
+    // Deleted methods to updated user, that'll only be handled in the Authentication layer
 
     // Delete User by id
     @DeleteMapping("/users/{userId}")

@@ -13,8 +13,6 @@ public interface UserService {
 
     UserResponse findById(int id);
 
-    User findByEmail(String email);
-
     // User save(User user);
     // using DTO method to avoid insertion of unecessary fields like id
     UserResponse save(CreateUserRequest request);
