@@ -19,10 +19,8 @@ const API_BASE_URL = 'http://localhost:8080/api'
 const TOKEN_STORAGE_KEY = 'taskflow_jwt'
 
 // Helper function to handle JSON responses and errors
-async function fetchJson<T>(
-  url: string,
-  options: RequestInit = {},
-): Promise<T> {
+// Need a generic type parameter to properly type the response data
+async function apiFetch<T>(url: string, options: RequestInit = {}): Promise<T> {
   const response = await fetch(url, {
     ...options,
     headers: {
@@ -38,6 +36,8 @@ async function fetchJson<T>(
 
   return response.json()
 }
+
+// Helper functions to manage tokens, using localStorage for ease
 
 export function setToken(token: string) {
   if (typeof window === 'undefined') return
@@ -64,7 +64,7 @@ export async function login(data: LoginRequest): Promise<AuthResponse> {
   console.log('Attempting to login....')
   console.log('Data:', data)
 
-  const response = await fetchJson<AuthResponse>(`${API_BASE_URL}/auth/login`, {
+  const response = await apiFetch<AuthResponse>(`${API_BASE_URL}/auth/login`, {
     method: 'POST',
     body: JSON.stringify(data),
   })
@@ -74,7 +74,7 @@ export async function login(data: LoginRequest): Promise<AuthResponse> {
 }
 
 export async function register(data: RegisterRequest): Promise<AuthResponse> {
-  const response = await fetchJson<AuthResponse>(
+  const response = await apiFetch<AuthResponse>(
     `${API_BASE_URL}/auth/register`,
     {
       method: 'POST',
@@ -108,8 +108,10 @@ export async function fetchWithAuth<T>(
   path: string,
   options: RequestInit = {},
 ): Promise<T> {
+  // If the path is a full URL, use it directly; otherwise, prepend the API base URL
   const url = path.startsWith('http') ? path : `${API_BASE_URL}${path}`
-  return fetchJson<T>(url, {
+  // using existing apiFetch function to handle response parsing and error handling, just adding auth headers
+  return apiFetch<T>(url, {
     ...options,
     headers: {
       ...(options.headers ?? {}),

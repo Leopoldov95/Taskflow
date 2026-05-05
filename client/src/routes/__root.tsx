@@ -1,4 +1,9 @@
-import { Outlet, createRootRoute, useLocation, useNavigate } from '@tanstack/react-router'
+import {
+  Outlet,
+  createRootRoute,
+  useLocation,
+  useNavigate,
+} from '@tanstack/react-router'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { TanStackDevtools } from '@tanstack/react-devtools'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
@@ -18,9 +23,11 @@ function RootComponent() {
   const navigate = useNavigate()
   const location = useLocation()
 
+  // On initial load, check if user is authenticated and redirect accordingly
   useEffect(() => {
     async function checkAuth() {
       const token = getToken()
+      // Check if the current route is an auth route (e.g., /auth, /auth/login, /auth/register)
       const isAuthRoute = location.pathname.startsWith('/auth')
 
       if (!token) {

@@ -2,16 +2,7 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
 import AuthForm from '#/components/auth/AuthForm'
 import { useAuth } from '#/hooks/useAuth'
-
-type AuthMode = 'signIn' | 'register'
-
-type FormValues = {
-  email: string
-  password: string
-  firstName?: string
-  lastName?: string
-  confirmPassword?: string
-}
+import type { AuthMode, FormValues } from '@/types/auth'
 
 export const Route = createFileRoute('/auth/')({
   component: Auth,
@@ -39,6 +30,7 @@ function Auth() {
         })
       }
 
+      // on login or registration success, navigate to home page
       navigate({ to: '/', replace: true })
     } catch (error) {
       // errors handled by useAuth toast callbacks

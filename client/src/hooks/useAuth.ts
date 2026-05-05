@@ -40,7 +40,10 @@ export function useAuth() {
       toast.success('Account created successfully!')
     },
     onError: (error) => {
-      toast.error('Failed to create account. Please try again.')
+      const errorMessage = JSON.parse(error.message)
+      errorMessage?.message
+        ? toast.error(`Registration failed: ${errorMessage.message}`)
+        : toast.error('Failed to create account. Please try again.')
       console.error('Register error:', error)
     },
   })

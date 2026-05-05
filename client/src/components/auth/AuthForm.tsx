@@ -18,16 +18,8 @@ import {
   FieldGroup,
   FieldLabel,
 } from '@/components/ui/field'
-
-type AuthMode = 'signIn' | 'register'
-
-type FormValues = {
-  email: string
-  password: string
-  firstName?: string
-  lastName?: string
-  confirmPassword?: string
-}
+// looks like `import type` is new?
+import type { AuthMode, FormValues } from '@/types/auth'
 
 interface AuthFormProps {
   mode: AuthMode
@@ -85,7 +77,6 @@ export default function AuthForm({
       toast.error('Please correct the errors in the form')
       return
     }
-    console.log('submitting form')
 
     onSubmit(data)
   }

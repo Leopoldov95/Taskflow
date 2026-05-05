@@ -18,6 +18,9 @@ todos.json
 
 # ShadCDN components
 
+# In progress
+client/**/*.test.*
+
 
 ############################
 #### SERVER PROPERTIES #####
