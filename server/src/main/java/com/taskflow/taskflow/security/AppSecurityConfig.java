@@ -50,6 +50,7 @@ public class AppSecurityConfig {
                 // Team routes
                 .requestMatchers(HttpMethod.GET, "/api/teams").authenticated()
                 .requestMatchers(HttpMethod.GET, "/api/teams/**").authenticated()
+                .requestMatchers(HttpMethod.POST, "/api/teams").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.POST, "/api/teams/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.PATCH, "/api/teams/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.DELETE, "/api/teams/**").hasRole("ADMIN")

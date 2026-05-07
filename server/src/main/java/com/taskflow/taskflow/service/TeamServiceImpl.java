@@ -1,9 +1,13 @@
 package com.taskflow.taskflow.service;
 
+import com.taskflow.taskflow.dao.TeamMemberRepository;
 import com.taskflow.taskflow.dao.TeamRepository;
 import com.taskflow.taskflow.dao.UserRepository;
+import com.taskflow.taskflow.dto.team.CreateTeamRequest;
 import com.taskflow.taskflow.entity.Team;
+import com.taskflow.taskflow.entity.TeamMember;
 import com.taskflow.taskflow.entity.User;
+import com.taskflow.taskflow.entity.enums.TeamRole;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,11 +20,13 @@ import java.util.Set;
 public class TeamServiceImpl implements TeamService {
     private TeamRepository teamRepository;
     private UserRepository userRepository;
+    private TeamMemberRepository teamMemberRepository;
 
     @Autowired
-    public TeamServiceImpl(TeamRepository teamRepository, UserRepository userRepository) {
+    public TeamServiceImpl(TeamRepository teamRepository, UserRepository userRepository, TeamMemberRepository teamMemberRepository) {
         this.teamRepository = teamRepository;
         this.userRepository = userRepository;
+        this.teamMemberRepository = teamMemberRepository;
     }
 
     @Override
@@ -45,19 +51,22 @@ public class TeamServiceImpl implements TeamService {
 
     @Override
     @Transactional
-    public Team save(Team team) {
+    public Team save(Team team, int userId) {
         // Ensure creator exists
-        int creatorId = team.getCreatedBy().getId();
-
-        User creator = userRepository.findById(creatorId)
-                .orElseThrow(() -> new RuntimeException("User not found: " + creatorId));
+        User creator = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found: " + userId));
 
         team.setCreatedBy(creator);
+        Team savedTeam = teamRepository.save(team);
 
-        // Optionally auto-add creator as member
-        team.setMembers(Set.of(creator));
+        // Add creator as OWNER
+        TeamMember membership = new TeamMember();
+        membership.setTeam(savedTeam);
+        membership.setUser(creator);
+        membership.setRole(TeamRole.OWNER);
+        teamMemberRepository.save(membership);
 
-        return teamRepository.save(team);
+        return savedTeam;
     }
 
     @Override

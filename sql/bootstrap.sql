@@ -6,13 +6,6 @@
 USE taskflow;
 
 -- --------------------
--- ROLES
--- --------------------
-INSERT INTO roles (id, role) VALUES
-(1, 'ROLE_MEMBER'),
-(2, 'ROLE_ADMIN');
-
--- --------------------
 -- USERS
 -- --------------------
 INSERT INTO users (id, first_name, last_name, email, password, role_id) VALUES

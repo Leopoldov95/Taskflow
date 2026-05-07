@@ -70,6 +70,7 @@ CREATE TABLE `team_member` (
 	created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	team_id INT NOT NULL,
 	user_id INT NOT NULL,
+	role ENUM('OWNER', 'MEMBER') NOT NULL DEFAULT 'MEMBER',
 	PRIMARY KEY (id),
 	UNIQUE (team_id, user_id),
 	INDEX (team_id),
@@ -87,7 +88,7 @@ CREATE TABLE `projects` (
 	name VARCHAR(50) NOT NULL,
 	description TEXT,
 	team_id INT NOT NULL,
-	project_key VARCHAR(2) NOT NULL,
+	project_key VARCHAR(4) NOT NULL,
 	status ENUM ('ACTIVE', 'ARCHIVE', 'COMPLETED') NOT NULL DEFAULT 'ACTIVE',
 	PRIMARY KEY (id),
 	CONSTRAINT fk_team_id FOREIGN KEY (team_id) REFERENCES teams(id) ON DELETE RESTRICT,
@@ -105,19 +106,22 @@ CREATE TABLE `tasks` (
 	name VARCHAR(100) NOT NULL,
 	description TEXT,
 	project_id INT NOT NULL,
+	team_id INT NOT NULL,
 	task_key INT NOT NULL,
-	assignee INT NOT NULL,
+	assignee INT,
 	status ENUM ('BACKLOG', 'IN_PROGRESS', 'REVIEW', 'DONE', 'ARCHIVE') DEFAULT 'BACKLOG',
-	due_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+	due_date TIMESTAMP NULL,
 	priority ENUM ('LOW', 'NORMAL', 'HIGH') DEFAULT 'NORMAL',
 	created_by INT NOT NULL,
 	deleted_at TIMESTAMP DEFAULT NULL,
 	PRIMARY KEY (id),
 	UNIQUE (project_id, task_key),
 	INDEX (project_id),
+	INDEX (team_id),
 	INDEX (assignee),
 	INDEX (status),
 	CONSTRAINT fk_task_project_id FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE RESTRICT,
+	CONSTRAINT fk_task_team_id FOREIGN KEY (team_id) REFERENCES teams(id) ON DELETE RESTRICT,
 	CONSTRAINT fk_task_assignee_id FOREIGN KEY (assignee) REFERENCES users(id) ON DELETE RESTRICT,
 	CONSTRAINT fk_task_creator_id FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE RESTRICT
 );
@@ -170,8 +174,7 @@ CREATE TABLE `documents` (
 -- Define additional FOREIGN KEYS and CONSTRAINST
 
 ALTER TABLE `users` ADD
-CONSTRAINT check_email CHECK (email LIKE '%_@_%.__%'),
-CONSTRAINT fk_user_role FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE RESTRICT ON UPDATE CASCADE;
+CONSTRAINT check_email CHECK (email LIKE '%_@_%.__%');
 
 ALTER TABLE `user_role` ADD
 CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -181,13 +184,15 @@ CONSTRAINT fk_role_id FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE RESTR
 
 -- Add Indexes where needed
 
-ALTER TABLE `user_role` ADD (
-INDEX `user_id_index` (`user_id`),
-INDEX `role_id_index` (`role_id`)
-);
-
 ALTER TABLE `team_member` ADD (
 INDEX `team_id_index` (`team_id`),
 INDEX `user_id_index` (`user_id`)
 );
 
+
+-- --------------------
+-- ROLES
+-- --------------------
+INSERT INTO roles (id, role) VALUES
+(1, 'ROLE_MEMBER'),
+(2, 'ROLE_ADMIN');

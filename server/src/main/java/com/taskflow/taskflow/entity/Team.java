@@ -46,17 +46,9 @@ public class Team {
     @JoinColumn(name = "created_by", nullable = false)
     private User createdBy;
 
-    // Members (Many-to-Many via team_member)
-    @ManyToMany
-    // Looks like joins `teams` id on `team_member` team_id column
-    @JoinTable(
-            name = "team_member",
-            joinColumns = @JoinColumn(name = "team_id"),
-            inverseJoinColumns = @JoinColumn(name = "user_id")
-    )
-
-    // name for the team members set
-    private Set<User> members;
+    // Members (One-to-Many via team_member entity)
+    @OneToMany(mappedBy = "team", cascade = CascadeType.ALL)
+    private Set<TeamMember> members;
 
     // Constructor
     public Team() {}
@@ -141,11 +133,11 @@ public class Team {
         this.createdBy = createdBy;
     }
 
-    public Set<User> getMembers() {
+    public Set<TeamMember> getMembers() {
         return members;
     }
 
-    public void setMembers(Set<User> members) {
+    public void setMembers(Set<TeamMember> members) {
         this.members = members;
     }
 
