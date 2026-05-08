@@ -1,12 +1,13 @@
 package com.taskflow.taskflow.rest;
 
-import com.taskflow.taskflow.dto.team.CreateTeamRequest;
-import com.taskflow.taskflow.dto.team.TeamResponse;
+import com.taskflow.taskflow.dto.team.*;
 import com.taskflow.taskflow.entity.Team;
 import com.taskflow.taskflow.entity.User;
+import com.taskflow.taskflow.exception.ResourceNotFoundException;
 import com.taskflow.taskflow.security.UserDetailsServiceImpl;
 import com.taskflow.taskflow.service.TeamService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.AuthenticatedPrincipal;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -60,14 +61,13 @@ public class TeamRestController {
         return new TeamResponse(dbTeam);
     }
 
-    // update (PUT) as existing Team
-    @PutMapping("/teams")
-    public Team updateTeam(@RequestBody Team theTeam, @AuthenticationPrincipal User currentUser) {
-        if (currentUser == null) {
-            throw new RuntimeException("User not logged in");
-        }
-        Team dbTeam = teamService.save(theTeam, currentUser.getId());
-        return dbTeam;
+    // update (Patch) as existing Team
+    @PatchMapping("/teams")
+    public Team updateTeam(@AuthenticationPrincipal User currentUser,
+                           @PathVariable int teamId,
+                           @RequestBody UpdateTeamRequest request
+    ) {
+            return teamService.updateTeam(currentUser, teamId, request);
     }
 
     // delete team by id
@@ -76,10 +76,36 @@ public class TeamRestController {
         Team tempTeam = teamService.findById(teamId);
 
         if (tempTeam == null) {
-            throw new RuntimeException("Team not found: " + teamId);
+            throw new ResourceNotFoundException("Team not found: " + teamId);
         }
 
         teamService.deleteById(teamId);
         return "Team deleted: " + teamId;
     }
+
+    //////////////////////////////////////
+    /// TEAM MEMBERS ////////////////////
+    /////////////////////////////////////
+
+    // Get all team members
+    // We want a list of id, firstname, lastname, role
+    @GetMapping("/teams/{teamId}/members")
+    public List<TeamMemberResponse> getTeamMembers(@PathVariable int teamId, @AuthenticationPrincipal User currentUser) {
+        return teamService.getTeamMembers(teamId, currentUser)
+                .stream()
+                .map(TeamMemberResponse::new)
+                .toList();
+    }
+
+    // Add new team member
+    @PostMapping("/teams/{teamId}/members")
+    public ResponseEntity<String> addTeamMember(
+            @PathVariable int teamId,
+            @RequestBody AddTeamMemberRequest request,
+            @AuthenticationPrincipal User currentUser) {
+        teamService.addTeamMembers(teamId, request, currentUser);
+        return ResponseEntity.ok("Team members added successfully!");
+    }
+
+    // Remove (Delete) team member
 }

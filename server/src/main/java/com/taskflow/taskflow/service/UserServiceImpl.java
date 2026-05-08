@@ -2,24 +2,18 @@ package com.taskflow.taskflow.service;
 
 import com.taskflow.taskflow.dao.RoleRepository;
 import com.taskflow.taskflow.dao.UserRepository;
-import com.taskflow.taskflow.dto.user.CreateUserRequest;
 import com.taskflow.taskflow.dto.user.UpdateUserPasswordRequest;
 import com.taskflow.taskflow.dto.user.UpdateUserRequest;
 import com.taskflow.taskflow.dto.user.UserResponse;
-import com.taskflow.taskflow.entity.Role;
 import com.taskflow.taskflow.entity.User;
-import com.taskflow.taskflow.entity.enums.RoleType;
 import com.taskflow.taskflow.exception.BadRequestException;
 import com.taskflow.taskflow.exception.ResourceNotFoundException;
-import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -69,46 +63,32 @@ public class UserServiceImpl implements UserService {
             theUser = user.get();
         } else {
             // User not found
-            throw new RuntimeException("Did not find user with id: " + id);
+            throw new ResourceNotFoundException("Did not find user with id: " + id);
         }
         return mapToResponse(theUser);
     }
 
 
     // Creates a new user and sets the role (default is ROLE_MEMBER)
-    @Transactional
-    @Override
-    public UserResponse save(CreateUserRequest request) {
-        // OLD method, switching to DTO
-
-        // 🔐 encode password
-//        user.setPassword(passwordEncoder.encode(user.getPassword()));
+//    @Transactional
+//    @Override
+//    public UserResponse save(CreateUserRequest request) {
 //
-//        // 💾 save user first
-//        User savedUser = userRepository.save(user);
+//        User user = new User();
+//        user.setFirstName(request.getFirstName());
+//        user.setLastName(request.getLastName());
+//        user.setEmail(request.getEmail());
 //
-//        // 👤 assign default role
+//
+//        // encode password here (IMPORTANT)
+//        user.setPassword(passwordEncoder.encode(request.getPassword()));
+//
+//        // default role assignment
 //        Role role = roleRepository.findByName(RoleType.ROLE_MEMBER.name());
+//        user.setRoles(Set.of(role));
 //
-//        savedUser.setRoles(Set.of(role));
-//
-//        return userRepository.save(savedUser);
-
-        User user = new User();
-        user.setFirstName(request.getFirstName());
-        user.setLastName(request.getLastName());
-        user.setEmail(request.getEmail());
-
-
-        // encode password here (IMPORTANT)
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
-
-        // default role assignment
-        Role role = roleRepository.findByName(RoleType.ROLE_MEMBER.name());
-        user.setRoles(Set.of(role));
-
-        return mapToResponse(userRepository.save(user));
-    }
+//        return mapToResponse(userRepository.save(user));
+//    }
 
     // Update user fields
     @Override

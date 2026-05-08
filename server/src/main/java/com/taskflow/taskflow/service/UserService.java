@@ -1,10 +1,8 @@
 package com.taskflow.taskflow.service;
 
-import com.taskflow.taskflow.dto.user.CreateUserRequest;
 import com.taskflow.taskflow.dto.user.UpdateUserPasswordRequest;
 import com.taskflow.taskflow.dto.user.UpdateUserRequest;
 import com.taskflow.taskflow.dto.user.UserResponse;
-import com.taskflow.taskflow.entity.User;
 
 import java.util.List;
 
@@ -15,7 +13,7 @@ public interface UserService {
 
     // User save(User user);
     // using DTO method to avoid insertion of unecessary fields like id
-    UserResponse save(CreateUserRequest request);
+//    UserResponse save(CreateUserRequest request);
 
     UserResponse updateUser(int id, UpdateUserRequest request);
 

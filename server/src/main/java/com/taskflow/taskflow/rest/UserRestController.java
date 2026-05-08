@@ -1,13 +1,8 @@
 package com.taskflow.taskflow.rest;
 
-import com.taskflow.taskflow.dto.user.CreateUserRequest;
-import com.taskflow.taskflow.dto.user.UpdateUserPasswordRequest;
-import com.taskflow.taskflow.dto.user.UpdateUserRequest;
 import com.taskflow.taskflow.dto.user.UserResponse;
-import com.taskflow.taskflow.entity.User;
 import com.taskflow.taskflow.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -41,12 +36,13 @@ public class UserRestController {
     }
 
     // Create a new User
-    @PostMapping("/users")
-    public UserResponse createUser(@RequestBody CreateUserRequest request) {
-        UserResponse dbUser = userService.save(request);
-
-        return dbUser;
-    }
+    //! Update - Do not need this as it is handled during registration
+//    @PostMapping("/users")
+//    public UserResponse createUser(@RequestBody CreateUserRequest request) {
+//        UserResponse dbUser = userService.save(request);
+//
+//        return dbUser;
+//    }
 
     // Deleted methods to updated user, that'll only be handled in the Authentication layer
 
