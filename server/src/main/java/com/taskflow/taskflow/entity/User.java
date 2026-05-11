@@ -12,7 +12,9 @@ import java.util.Date;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-// TODO ~ find a better way to organize this, like in TS having a types folder
+/**
+ * Must implement UserDetails interface to be used by Spring Security
+ */
 
 @Entity
 @Table(name="users")
@@ -62,9 +64,9 @@ public class User implements UserDetails {
     // inverse mapping to `teams`
     // value of mappedBy MUST match the variable name in TEAMS entity
     // @JsonIgnore required to avoid infinite loop of mappings
-    @ManyToMany(mappedBy = "members")
+    @OneToMany(mappedBy = "user")
     @JsonIgnore
-    private Set<Team> teams;
+    private Set<TeamMember> teamMembers;
 
     // UserDetails methods
 
@@ -182,6 +184,14 @@ public class User implements UserDetails {
 
     public void setRoles(Set<Role> roles) {
         this.roles = roles;
+    }
+
+    public Set<TeamMember> getTeamMembers() {
+        return teamMembers;
+    }
+
+    public void setTeamMembers(Set<TeamMember> teamMembers) {
+        this.teamMembers = teamMembers;
     }
 
     @Override
