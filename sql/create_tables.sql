@@ -4,6 +4,8 @@
 CREATE DATABASE  IF NOT EXISTS `taskflow`;
 USE `taskflow`;
 
+SET FOREIGN_KEY_CHECKS = 0;
+
 DROP TABLE IF EXISTS `users`;
 DROP TABLE IF EXISTS `roles`;
 DROP TABLE IF EXISTS `user_role`;
@@ -12,6 +14,8 @@ DROP TABLE IF EXISTS `team_member`;
 DROP TABLE IF EXISTS `tasks`;
 DROP TABLE IF EXISTS `task_comment`;
 DROP TABLE IF EXISTS `documents`;
+
+SET FOREIGN_KEY_CHECKS = 1;
 
 -- Create User table
 
