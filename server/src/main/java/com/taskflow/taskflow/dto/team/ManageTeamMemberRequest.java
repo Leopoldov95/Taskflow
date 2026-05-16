@@ -7,7 +7,7 @@ import java.util.List;
  * We want to accept a list of User IDs to avoid situations where adding multiple users
  * Results in making multiple API calls
  */
-public class AddTeamMemberRequest {
+public class ManageTeamMemberRequest {
     public List<Integer> userIds;
 
     public List<Integer> getUserIds() {

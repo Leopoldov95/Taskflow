@@ -3,13 +3,13 @@ package com.taskflow.taskflow.service;
 import com.taskflow.taskflow.dao.TeamMemberRepository;
 import com.taskflow.taskflow.dao.TeamRepository;
 import com.taskflow.taskflow.dao.UserRepository;
-import com.taskflow.taskflow.dto.team.AddTeamMemberRequest;
-import com.taskflow.taskflow.dto.team.CreateTeamRequest;
+import com.taskflow.taskflow.dto.team.ManageTeamMemberRequest;
 import com.taskflow.taskflow.dto.team.UpdateTeamRequest;
 import com.taskflow.taskflow.entity.Team;
 import com.taskflow.taskflow.entity.TeamMember;
 import com.taskflow.taskflow.entity.User;
 import com.taskflow.taskflow.entity.enums.TeamRole;
+import com.taskflow.taskflow.exception.DuplicateResourceException;
 import com.taskflow.taskflow.exception.ResourceNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +19,6 @@ import org.springframework.security.access.AccessDeniedException;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 @Service
 public class TeamServiceImpl implements TeamService {
@@ -48,7 +47,7 @@ public class TeamServiceImpl implements TeamService {
         if (team.isPresent()) {
             theTeam = team.get();
         } else {
-            // User not found
+            // Team not found
             throw new ResourceNotFoundException("Did not find team with id: " + id);
         }
         return theTeam;
@@ -60,6 +59,11 @@ public class TeamServiceImpl implements TeamService {
         // Ensure creator exists
         User creator = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found: " + userId));
+
+        // Ensure same team name not being used
+        if (teamRepository.existsByNameAndCreatedBy(team.getName(), creator)) {
+            throw new DuplicateResourceException("ERROR: You already have a team named: " + team.getName());
+        }
 
         team.setCreatedBy(creator);
         Team savedTeam = teamRepository.save(team);
@@ -100,7 +104,11 @@ public class TeamServiceImpl implements TeamService {
 
     @Override
     public void deleteById(int id) {
-        teamRepository.deleteById(id);
+        // ensure team exists
+        Team team = teamRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Team not found: " + id));
+
+        teamRepository.delete(team);
     }
 
     //////////////////////////////////////
@@ -124,7 +132,7 @@ public class TeamServiceImpl implements TeamService {
 
     // NOTE ~ On the client side will need a way to handle this to avoid multiple requests
     @Override
-    public void addTeamMembers(int teamId, AddTeamMemberRequest request, User currentUser) {
+    public void addTeamMembers(int teamId, ManageTeamMemberRequest request, User currentUser) {
         Team team = teamRepository.findById(teamId)
                 .orElseThrow(() -> new ResourceNotFoundException("Team not found"));
 
@@ -153,6 +161,30 @@ public class TeamServiceImpl implements TeamService {
             newMember.setRole(TeamRole.MEMBER);
             teamMemberRepository.save(newMember);
         }
+    }
+
+    // remove team members, will use same pattern as passing in User IDs in an array to avoid
+    // multiple API calls
+    @Transactional
+    public void removeTeamMembers(int teamId, ManageTeamMemberRequest request, User currentUser) {
+        Team team = teamRepository.findById(teamId)
+                .orElseThrow(() -> new ResourceNotFoundException("Team not found"));
+
+        // Only OWNER can add members
+        TeamMember membership = teamMemberRepository
+                .findByTeamIdAndUserId(teamId, currentUser.getId())
+                .orElseThrow(() -> new AccessDeniedException("Not a member of this team"));
+
+        if (membership.getRole() != TeamRole.OWNER) {
+            throw new AccessDeniedException("Only owners can add members");
+        }
+
+        // Prevent owner from removing themselves
+        if (request.getUserIds().contains(currentUser.getId())) {
+            throw new IllegalArgumentException("Owner cannot be removed from the team");
+        }
+
+        teamMemberRepository.deleteByTeamIdAndUserIdIn(teamId, request.getUserIds());
     }
 }
 

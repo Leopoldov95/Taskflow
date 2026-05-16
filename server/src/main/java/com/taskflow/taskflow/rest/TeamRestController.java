@@ -3,14 +3,11 @@ package com.taskflow.taskflow.rest;
 import com.taskflow.taskflow.dto.team.*;
 import com.taskflow.taskflow.entity.Team;
 import com.taskflow.taskflow.entity.User;
-import com.taskflow.taskflow.exception.ResourceNotFoundException;
-import com.taskflow.taskflow.security.UserDetailsServiceImpl;
 import com.taskflow.taskflow.service.TeamService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.AuthenticatedPrincipal;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -39,46 +36,43 @@ public class TeamRestController {
     @GetMapping("/teams/{teamId}")
     public TeamResponse getTeam(@PathVariable int teamId) {
         Team theTeam = teamService.findById(teamId);
-
-        if (theTeam == null) {
-            throw new RuntimeException("Team not found: " + teamId);
-        }
-
         return new TeamResponse(theTeam);
     }
 
     // Create a new Team
     @PostMapping("/teams")
     public TeamResponse createTeam(
-            @RequestBody Team theTeam,
+            @Valid @RequestBody CreateTeamRequest request,
             @AuthenticationPrincipal User currentUser) {
         // We need the user ID for this to function, as it can only be invoked by an authorized user, can just use requester's ID
+        // TODO ~ This might be redundant as Spring Security layer will handle unauthorized users
         if (currentUser == null) {
             throw new RuntimeException("User not logged in");
         }
 
-        Team dbTeam = teamService.save(theTeam, currentUser.getId());
+        Team team = new Team();
+        team.setName(request.getName());
+        team.setDescription(request.getDescription());
+        team.setColor(request.getColor());
+        team.setIcon(request.getIcon());
+
+        Team dbTeam = teamService.save(team, currentUser.getId());
         return new TeamResponse(dbTeam);
     }
 
     // update (Patch) as existing Team
-    @PatchMapping("/teams")
-    public Team updateTeam(@AuthenticationPrincipal User currentUser,
+    @PatchMapping("/teams/{teamId}")
+    public TeamResponse updateTeam(@AuthenticationPrincipal User currentUser,
                            @PathVariable int teamId,
-                           @RequestBody UpdateTeamRequest request
+                           @Valid @RequestBody UpdateTeamRequest request
     ) {
-            return teamService.updateTeam(currentUser, teamId, request);
+            Team dbTeam = teamService.updateTeam(currentUser, teamId, request);
+            return new TeamResponse(dbTeam);
     }
 
     // delete team by id
     @DeleteMapping("/teams/{teamId}")
     public String deleteTeam(@PathVariable int teamId) {
-        Team tempTeam = teamService.findById(teamId);
-
-        if (tempTeam == null) {
-            throw new ResourceNotFoundException("Team not found: " + teamId);
-        }
-
         teamService.deleteById(teamId);
         return "Team deleted: " + teamId;
     }
@@ -101,11 +95,21 @@ public class TeamRestController {
     @PostMapping("/teams/{teamId}/members")
     public ResponseEntity<String> addTeamMember(
             @PathVariable int teamId,
-            @RequestBody AddTeamMemberRequest request,
+            @RequestBody ManageTeamMemberRequest request,
             @AuthenticationPrincipal User currentUser) {
         teamService.addTeamMembers(teamId, request, currentUser);
         return ResponseEntity.ok("Team members added successfully!");
     }
 
-    // Remove (Delete) team member
+    // Remove (Delete) team member(s)
+    @DeleteMapping("/teams/{teamId}/members")
+    public ResponseEntity<String> deleteTeamMember(
+            @PathVariable int teamId,
+            @RequestBody ManageTeamMemberRequest request,
+            @AuthenticationPrincipal User currentUser
+    ) {
+        teamService.removeTeamMembers(teamId, request, currentUser);
+        return ResponseEntity.ok("Team members deleted successfully!");
+    }
+
 }

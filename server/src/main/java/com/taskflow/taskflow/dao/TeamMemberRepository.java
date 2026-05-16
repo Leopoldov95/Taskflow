@@ -10,4 +10,5 @@ public interface TeamMemberRepository extends JpaRepository<TeamMember, Integer>
     Optional<TeamMember> findByTeamIdAndUserId(int teamId, int userId);
     boolean existsByTeamIdAndUserId(int teamId, int userId);
     List<TeamMember> findByTeamId(int teamId);
+    void deleteByTeamIdAndUserIdIn(int teamId, List<Integer> userIds);
 }

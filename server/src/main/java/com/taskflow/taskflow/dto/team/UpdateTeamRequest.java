@@ -1,10 +1,26 @@
 package com.taskflow.taskflow.dto.team;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
+
 public class UpdateTeamRequest {
+
+    @Size(min = 5, max = 50, message = "Team name must be between 5 and 50 characters")
     private String name;
+
+    @Size(min = 20, max = 500, message = "Description must be between 20 and 500 characters")
     private String description;
+
     private Boolean isActive;
+
+    @Pattern(
+            regexp = "^#[0-9a-fA-F]{6}$",
+            message = "Invalid hex color"
+    )
     private String color;
+
+    @Size(min = 3, max = 20, message = "Must be a valid icon")
     private String icon;
 
     public String getName() {
