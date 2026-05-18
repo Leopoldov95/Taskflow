@@ -12,10 +12,10 @@ public interface TeamService {
     List<Team> findAll();
     Team findById(int id);
     Team save(Team team, int userId);
-    Team updateTeam(User user, int teamId, UpdateTeamRequest request);
+    Team updateTeam(int teamId, UpdateTeamRequest request);
     void deleteById(int id);
     // Team Member services
-    List<TeamMember> getTeamMembers(int teamId, User currentUser);
-    void addTeamMembers(int teamId, ManageTeamMemberRequest request, User currentUser);
-    void removeTeamMembers(int teamId, ManageTeamMemberRequest request, User currentUser);
+    List<TeamMember> getTeamMembers(int teamId);
+    void addTeamMembers(int teamId, ManageTeamMemberRequest request);
+    void removeTeamMembers(int teamId, ManageTeamMemberRequest request);
 }

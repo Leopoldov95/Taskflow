@@ -1,6 +1,9 @@
 package com.taskflow.taskflow.entity;
 
+import com.taskflow.taskflow.entity.enums.ProjectStatus;
 import jakarta.persistence.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.util.Date;
 
@@ -14,28 +17,33 @@ public class Project {
     @Column(name="id")
     private int id;
 
-    @Column(name="name")
+    @Column(name="name", nullable = false)
     private String name;
 
-    @Column(name="description")
+    @Column(name="description", nullable = false)
     private String description;
 
+    @Enumerated(EnumType.STRING)
     @Column(name="status")
     // ENUM type
-    private String status;
+    private ProjectStatus status;
 
     @Column(name = "created_at")
+    @CreationTimestamp
     private Date createdAt;
 
     @Column(name="updated_at")
+    @UpdateTimestamp
     private Date updatedAt;
 
-    @Column(name="team_id")
-    // Need to add foreign key constraint
-    private int teamId;
+    // (One Project can have many teams)
+    // (Many Projects -> One Team)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "team_id", nullable = false)
+    private Team team;
 
     @Column(name="project_key")
-    private int projectKey;
+    private String projectKey;
 
     public int getId() {
         return id;
@@ -61,11 +69,11 @@ public class Project {
         this.description = description;
     }
 
-    public String getStatus() {
+    public ProjectStatus getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(ProjectStatus status) {
         this.status = status;
     }
 
@@ -85,19 +93,19 @@ public class Project {
         this.updatedAt = updatedAt;
     }
 
-    public int getTeamId() {
-        return teamId;
+    public Team getTeam() {
+        return team;
     }
 
-    public void setTeamId(int teamId) {
-        this.teamId = teamId;
+    public void setTeam(Team team) {
+        this.team = team;
     }
 
-    public int getProjectKey() {
+    public String getProjectKey() {
         return projectKey;
     }
 
-    public void setProjectKey(int projectKey) {
+    public void setProjectKey(String projectKey) {
         this.projectKey = projectKey;
     }
 
@@ -110,7 +118,7 @@ public class Project {
                 ", status='" + status + '\'' +
                 ", createdAt=" + createdAt +
                 ", updatedAt=" + updatedAt +
-                ", teamId=" + teamId +
+                ", teamId=" + team.getId() +
                 ", projectKey=" + projectKey +
                 '}';
     }

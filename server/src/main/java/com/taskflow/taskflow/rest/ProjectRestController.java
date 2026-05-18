@@ -1,8 +1,13 @@
 package com.taskflow.taskflow.rest;
 
+import com.taskflow.taskflow.dto.project.CreateProjectRequest;
+import com.taskflow.taskflow.dto.project.UpdateProjectRequest;
 import com.taskflow.taskflow.entity.Project;
+import com.taskflow.taskflow.entity.User;
 import com.taskflow.taskflow.service.ProjectService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,9 +24,9 @@ public class ProjectRestController {
     }
 
     // get a list of projects
-    @GetMapping("/projects")
-    public List<Project> projects() {
-        return projectService.findAll();
+    @GetMapping("/teams/{teamId}/projects")
+    public List<Project> projects(@PathVariable int teamId) {
+        return projectService.findAllByTeamId(teamId);
     }
 
     // get a single project by id
@@ -29,37 +34,27 @@ public class ProjectRestController {
     public Project getProject(@PathVariable int projectId) {
         Project theProject = projectService.findById(projectId);
 
-        if (theProject == null) {
-            throw new RuntimeException("Project not found: " + projectId);
-        }
-
         return theProject;
     }
 
     // Create a new project
-    @PostMapping("/projects")
-    public Project createProject(@RequestBody Project project) {
-        Project dbProject = projectService.save(project);
+    @PostMapping("/teams/{teamId}/projects")
+    public Project createProject(@PathVariable int teamId, @RequestBody CreateProjectRequest project) {
+        Project dbProject = projectService.save(teamId, project);
         return dbProject;
     }
 
-    // update (PUT) an existing project
-    @PutMapping("/projects")
-    public Project updateProject(@RequestBody Project project) {
-        Project dbProject = projectService.save(project);
+    // update (PATCH) an existing project
+    @PatchMapping("/projects/{projectId}")
+    public Project updateProject(@PathVariable int projectId, @RequestBody UpdateProjectRequest project) {
+        Project dbProject = projectService.update(projectId, project);
         return dbProject;
     }
 
     // delete project by id
     @DeleteMapping("/projects/{projectId}")
-    public String deleteProject(@PathVariable int projectId) {
-        Project tempProject = projectService.findById(projectId);
-
-        if (tempProject == null) {
-            throw new RuntimeException("Project not found: " + projectId);
-        }
-
+    public ResponseEntity<String> deleteProject(@PathVariable int projectId) {
         projectService.deleteById(projectId);
-        return "Project deleted: " + projectId;
+        return ResponseEntity.ok("Deleted project successfully with id: " + projectId);
     }
 }

@@ -47,8 +47,17 @@ public class Team {
     private User createdBy;
 
     // Members (One-to-Many via team_member entity)
+    // mappedBy is for join tables
     @OneToMany(mappedBy = "team", cascade = CascadeType.ALL)
     private Set<TeamMember> members;
+
+    // Projects (One Team -> Many Projects)
+//    @OneToMany
+//    @JoinColumn(name = "team_id", nullable = false)
+//    private Set<Project> projects;
+
+    @OneToMany(mappedBy = "team", cascade = CascadeType.ALL)
+    private Set<Project> projects;
 
     // Constructor
     public Team() {}

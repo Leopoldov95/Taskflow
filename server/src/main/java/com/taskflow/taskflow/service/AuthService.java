@@ -11,6 +11,7 @@ import com.taskflow.taskflow.entity.enums.RoleType;
 import com.taskflow.taskflow.security.JwtService;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -70,5 +71,12 @@ public class AuthService {
 
         String token = jwtService.generateToken(user);
         return new AuthResponse(token);
+    }
+
+    // Get current User details, needed in order to ensure User has correct Team permissions
+    public User getCurrentUser() {
+        return (User) SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getPrincipal();
     }
 }

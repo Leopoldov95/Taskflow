@@ -1,6 +1,7 @@
 package com.taskflow.taskflow.rest;
 
 import com.taskflow.taskflow.dto.user.UserResponse;
+import com.taskflow.taskflow.entity.User;
 import com.taskflow.taskflow.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -12,6 +13,17 @@ import java.util.List;
 public class UserRestController {
     private UserService userService;
 
+    // method to ensure we are getting User response in correct format
+    private UserResponse mapToResponse(User user) {
+        return new UserResponse(
+                user.getId(),
+                user.getFirstName(),
+                user.getLastName(),
+                user.getEmail(),
+                user.isActive()
+        );
+    }
+
     @Autowired
     public UserRestController(UserService userService) {
         this.userService = userService;
@@ -20,19 +32,17 @@ public class UserRestController {
     // expose "/users" and get a list of users
     @GetMapping("/users")
     public List<UserResponse> getUsers() {
-        return userService.findAll();
+        return userService.findAll().stream()
+                .map(this::mapToResponse)
+                .toList();
     }
 
     // Get a single user by id
     @GetMapping("/users/{userId}")
     public UserResponse getUser(@PathVariable int userId) {
-        UserResponse theUser = userService.findById(userId);
+        User theUser = userService.findById(userId);
 
-        if (theUser == null) {
-            throw new RuntimeException("User not found: " + userId);
-        }
-
-        return theUser;
+        return mapToResponse(theUser);
     }
 
     // Create a new User
@@ -49,7 +59,7 @@ public class UserRestController {
     // Delete User by id
     @DeleteMapping("/users/{userId}")
     public String deleteUser(@PathVariable int userId) {
-        UserResponse tempUser = userService.findById(userId);
+        User tempUser = userService.findById(userId);
 
           // throw exception if null
 

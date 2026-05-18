@@ -16,6 +16,17 @@ public class MeController {
 
     private final UserService userService;
 
+    // method to ensure we are getting User response in correct format
+    private UserResponse mapToResponse(User user) {
+        return new UserResponse(
+                user.getId(),
+                user.getFirstName(),
+                user.getLastName(),
+                user.getEmail(),
+                user.isActive()
+        );
+    }
+
     @Autowired
     public MeController(UserService userService) {
         this.userService = userService;
@@ -25,14 +36,14 @@ public class MeController {
     @GetMapping
     public ResponseEntity<UserResponse> getMe() {
         User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        return ResponseEntity.ok(userService.findById(currentUser.getId()));
+        return ResponseEntity.ok(mapToResponse(userService.findById(currentUser.getId())));
     }
 
     // PATCH - update own name/email
     @PatchMapping
     public ResponseEntity<UserResponse> updateMe(@RequestBody UpdateUserRequest request){
         User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        return ResponseEntity.ok(userService.updateUser(currentUser.getId(), request));
+        return ResponseEntity.ok(mapToResponse(userService.updateUser(currentUser.getId(), request)));
     }
 
     // PATCH - update own password

@@ -33,28 +33,13 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    // method to ensure we are getting User response in correct format
-    private UserResponse mapToResponse(User user) {
-        return new UserResponse(
-                user.getId(),
-                user.getFirstName(),
-                user.getLastName(),
-                user.getEmail(),
-                user.isActive()
-        );
+    @Override
+    public List<User> findAll() {
+        return userRepository.findAll();
     }
 
     @Override
-    public List<UserResponse> findAll() {
-        return userRepository.findAll()
-                .stream()
-                .map(this::mapToResponse)
-                .toList();
-
-    }
-
-    @Override
-    public UserResponse findById(int id) {
+    public User findById(int id) {
         Optional<User> user = userRepository.findById(id);
 
         User theUser = null;
@@ -65,34 +50,13 @@ public class UserServiceImpl implements UserService {
             // User not found
             throw new ResourceNotFoundException("Did not find user with id: " + id);
         }
-        return mapToResponse(theUser);
+        return theUser;
     }
 
 
-    // Creates a new user and sets the role (default is ROLE_MEMBER)
-//    @Transactional
-//    @Override
-//    public UserResponse save(CreateUserRequest request) {
-//
-//        User user = new User();
-//        user.setFirstName(request.getFirstName());
-//        user.setLastName(request.getLastName());
-//        user.setEmail(request.getEmail());
-//
-//
-//        // encode password here (IMPORTANT)
-//        user.setPassword(passwordEncoder.encode(request.getPassword()));
-//
-//        // default role assignment
-//        Role role = roleRepository.findByName(RoleType.ROLE_MEMBER.name());
-//        user.setRoles(Set.of(role));
-//
-//        return mapToResponse(userRepository.save(user));
-//    }
-
     // Update user fields
     @Override
-    public UserResponse updateUser(int id, UpdateUserRequest request) {
+    public User updateUser(int id, UpdateUserRequest request) {
         User user = userRepository.findById(id).orElseThrow(() -> new RuntimeException("Did not find user with id: " + id));
 
         if (request.getFirstName() != null) user.setFirstName(request.getFirstName());
@@ -100,7 +64,7 @@ public class UserServiceImpl implements UserService {
         if (request.getEmail() != null) user.setEmail(request.getEmail());
 
         userRepository.save(user);
-        return mapToResponse(user);
+        return user;
     }
 
     // Update User password

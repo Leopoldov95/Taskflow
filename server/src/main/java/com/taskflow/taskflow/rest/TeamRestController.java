@@ -62,11 +62,10 @@ public class TeamRestController {
 
     // update (Patch) as existing Team
     @PatchMapping("/teams/{teamId}")
-    public TeamResponse updateTeam(@AuthenticationPrincipal User currentUser,
-                           @PathVariable int teamId,
+    public TeamResponse updateTeam(@PathVariable int teamId,
                            @Valid @RequestBody UpdateTeamRequest request
     ) {
-            Team dbTeam = teamService.updateTeam(currentUser, teamId, request);
+            Team dbTeam = teamService.updateTeam(teamId, request);
             return new TeamResponse(dbTeam);
     }
 
@@ -84,8 +83,8 @@ public class TeamRestController {
     // Get all team members
     // We want a list of id, firstname, lastname, role
     @GetMapping("/teams/{teamId}/members")
-    public List<TeamMemberResponse> getTeamMembers(@PathVariable int teamId, @AuthenticationPrincipal User currentUser) {
-        return teamService.getTeamMembers(teamId, currentUser)
+    public List<TeamMemberResponse> getTeamMembers(@PathVariable int teamId) {
+        return teamService.getTeamMembers(teamId)
                 .stream()
                 .map(TeamMemberResponse::new)
                 .toList();
@@ -95,9 +94,8 @@ public class TeamRestController {
     @PostMapping("/teams/{teamId}/members")
     public ResponseEntity<String> addTeamMember(
             @PathVariable int teamId,
-            @RequestBody ManageTeamMemberRequest request,
-            @AuthenticationPrincipal User currentUser) {
-        teamService.addTeamMembers(teamId, request, currentUser);
+            @RequestBody ManageTeamMemberRequest request) {
+        teamService.addTeamMembers(teamId, request);
         return ResponseEntity.ok("Team members added successfully!");
     }
 
@@ -105,10 +103,9 @@ public class TeamRestController {
     @DeleteMapping("/teams/{teamId}/members")
     public ResponseEntity<String> deleteTeamMember(
             @PathVariable int teamId,
-            @RequestBody ManageTeamMemberRequest request,
-            @AuthenticationPrincipal User currentUser
+            @RequestBody ManageTeamMemberRequest request
     ) {
-        teamService.removeTeamMembers(teamId, request, currentUser);
+        teamService.removeTeamMembers(teamId, request);
         return ResponseEntity.ok("Team members deleted successfully!");
     }
 
