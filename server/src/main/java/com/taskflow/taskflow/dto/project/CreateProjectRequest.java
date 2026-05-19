@@ -23,9 +23,6 @@ public class CreateProjectRequest {
     @Size(min = 4, max = 4, message = "Project key must be exactly 4 characters")
     private String projectKey;
 
-    @NotBlank(message = "Team Id is required")
-    private Team team;
-
     public CreateProjectRequest() {}
 
     public String getName() {
@@ -52,11 +49,4 @@ public class CreateProjectRequest {
         this.projectKey = projectKey;
     }
 
-    public @NotBlank(message = "Team Id is required") Team getTeam() {
-        return team;
-    }
-
-    public void setTeam(@NotBlank(message = "Team Id is required") Team team) {
-        this.team = team;
-    }
 }

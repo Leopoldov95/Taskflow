@@ -94,7 +94,7 @@ public class TeamRestController {
     @PostMapping("/teams/{teamId}/members")
     public ResponseEntity<String> addTeamMember(
             @PathVariable int teamId,
-            @RequestBody ManageTeamMemberRequest request) {
+            @Valid @RequestBody ManageTeamMemberRequest request) {
         teamService.addTeamMembers(teamId, request);
         return ResponseEntity.ok("Team members added successfully!");
     }
@@ -103,7 +103,7 @@ public class TeamRestController {
     @DeleteMapping("/teams/{teamId}/members")
     public ResponseEntity<String> deleteTeamMember(
             @PathVariable int teamId,
-            @RequestBody ManageTeamMemberRequest request
+            @Valid @RequestBody ManageTeamMemberRequest request
     ) {
         teamService.removeTeamMembers(teamId, request);
         return ResponseEntity.ok("Team members deleted successfully!");

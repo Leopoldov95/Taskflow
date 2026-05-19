@@ -11,7 +11,7 @@ public class ProjectResponse {
     private int id;
     private String name;
     private String description;
-    private Team team;
+    private int teamId;
     private Date updatedAt;
     private ProjectStatus status;
     private String projectKey;
@@ -21,7 +21,7 @@ public class ProjectResponse {
         this.id = project.getId();
         this.name = project.getName();
         this.description = project.getDescription();
-        this.team = project.getTeam();
+        this.teamId = project.getTeam().getId();
         this.updatedAt = project.getUpdatedAt();
         this.status = project.getStatus();
         this.projectKey = project.getProjectKey();
@@ -39,8 +39,8 @@ public class ProjectResponse {
         return description;
     }
 
-    public Team getTeam() {
-        return team;
+    public int getTeamId() {
+        return teamId;
     }
 
     public Date getUpdatedAt() {

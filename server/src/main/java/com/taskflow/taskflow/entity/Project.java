@@ -26,7 +26,7 @@ public class Project {
     @Enumerated(EnumType.STRING)
     @Column(name="status")
     // ENUM type
-    private ProjectStatus status;
+    private ProjectStatus status = ProjectStatus.ACTIVE; // default value
 
     @Column(name = "created_at")
     @CreationTimestamp

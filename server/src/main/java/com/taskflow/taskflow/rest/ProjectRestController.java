@@ -1,13 +1,13 @@
 package com.taskflow.taskflow.rest;
 
 import com.taskflow.taskflow.dto.project.CreateProjectRequest;
+import com.taskflow.taskflow.dto.project.ProjectResponse;
 import com.taskflow.taskflow.dto.project.UpdateProjectRequest;
 import com.taskflow.taskflow.entity.Project;
-import com.taskflow.taskflow.entity.User;
 import com.taskflow.taskflow.service.ProjectService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -25,30 +25,30 @@ public class ProjectRestController {
 
     // get a list of projects
     @GetMapping("/teams/{teamId}/projects")
-    public List<Project> projects(@PathVariable int teamId) {
-        return projectService.findAllByTeamId(teamId);
+    public List<ProjectResponse> projects(@PathVariable int teamId) {
+        return projectService.findAllByTeamId(teamId).stream().map(ProjectResponse::new).toList();
     }
 
     // get a single project by id
     @GetMapping("/projects/{projectId}")
-    public Project getProject(@PathVariable int projectId) {
+    public ProjectResponse getProject(@PathVariable int projectId) {
         Project theProject = projectService.findById(projectId);
 
-        return theProject;
+        return new ProjectResponse(theProject);
     }
 
     // Create a new project
     @PostMapping("/teams/{teamId}/projects")
-    public Project createProject(@PathVariable int teamId, @RequestBody CreateProjectRequest project) {
+    public ProjectResponse createProject(@PathVariable int teamId, @Valid @RequestBody CreateProjectRequest project) {
         Project dbProject = projectService.save(teamId, project);
-        return dbProject;
+        return new ProjectResponse(dbProject);
     }
 
     // update (PATCH) an existing project
     @PatchMapping("/projects/{projectId}")
-    public Project updateProject(@PathVariable int projectId, @RequestBody UpdateProjectRequest project) {
+    public ProjectResponse updateProject(@PathVariable int projectId, @Valid @RequestBody UpdateProjectRequest project) {
         Project dbProject = projectService.update(projectId, project);
-        return dbProject;
+        return new ProjectResponse(dbProject);
     }
 
     // delete project by id
