@@ -4,6 +4,6 @@ public enum TaskStatus {
     BACKLOG,
     IN_PROGRESS,
     REVIEW,
-    COMPLETED,
-    ARCHIVED,
+    DONE,
+    ARCHIVE,
 }

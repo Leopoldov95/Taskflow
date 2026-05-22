@@ -4,6 +4,7 @@ import com.taskflow.taskflow.entity.enums.TeamRole;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 /**
@@ -34,7 +35,7 @@ public class TeamMember {
 
     @CreationTimestamp
     @Column(name = "created_at")
-    private Date createdAt;
+    private LocalDateTime createdAt;
 
     public int getId() {
         return id;
@@ -68,11 +69,11 @@ public class TeamMember {
         this.role = role;
     }
 
-    public Date getCreatedAt() {
+    public LocalDateTime getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(Date createdAt) {
+    public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
     }
 }

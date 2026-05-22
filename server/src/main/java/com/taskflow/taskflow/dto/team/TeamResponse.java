@@ -2,6 +2,7 @@ package com.taskflow.taskflow.dto.team;
 
 import com.taskflow.taskflow.entity.Team;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 public class TeamResponse {
@@ -11,7 +12,7 @@ public class TeamResponse {
     private String color;
     private String icon;
     private boolean active;
-    private Date createdAt;
+    private LocalDateTime createdAt;
     private int createdBy; // just the ID
 
     // constructor
@@ -50,7 +51,7 @@ public class TeamResponse {
         return active;
     }
 
-    public Date getCreatedAt() {
+    public LocalDateTime getCreatedAt() {
         return createdAt;
     }
 

@@ -1,0 +1,124 @@
+package com.taskflow.taskflow.service;
+
+import com.taskflow.taskflow.dao.*;
+import com.taskflow.taskflow.dto.task.CreateTaskRequest;
+import com.taskflow.taskflow.dto.team.UpdateTeamRequest;
+import com.taskflow.taskflow.entity.Project;
+import com.taskflow.taskflow.entity.Task;
+import com.taskflow.taskflow.entity.User;
+import com.taskflow.taskflow.exception.ResourceNotFoundException;
+import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Optional;
+
+@Service
+public class TaskServiceImpl implements TaskService {
+
+    private TaskRepository taskRepository;
+    private ProjectRepository projectRepository;
+    private TeamRepository teamRepository;
+    private TeamMemberRepository teamMemberRepository;
+    private TeamAccessService teamAccessService;
+    private AuthService authService;
+
+    @Autowired
+    public TaskServiceImpl(TaskRepository taskRepository,
+                           ProjectRepository projectRepository,
+                           TeamRepository teamRepository,
+                           TeamMemberRepository teamMemberRepository,
+                           TeamAccessService teamAccessService,
+                           AuthService authService
+                           ) {
+        this.taskRepository = taskRepository;
+        this.projectRepository = projectRepository;
+        this.teamRepository = teamRepository;
+        this.teamMemberRepository = teamMemberRepository;
+        this.teamAccessService = teamAccessService;
+        this.authService = authService;
+    }
+
+    @Override
+    public List<Task> findAllByProjectId(int projectId) {
+        // will need to ensure User is part of the project
+        User currentUser = authService.getCurrentUser();
+
+        //1. Retrieve Project
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new ResourceNotFoundException("Project with id not found: " + projectId));
+
+        //2. Check that user is a member of the TEAM
+        teamAccessService.validateTeamAccess(project.getTeam().getId(), currentUser.getId());
+
+        // get all tasks for that project
+        return taskRepository.findAllByProjectId(projectId);
+    }
+
+    @Override
+    public Task findById(int taskId) {
+        // will need to ensure User has access
+        User currentUser = authService.getCurrentUser();
+
+        //1. Retrieve Task
+        Task task = taskRepository.findById(taskId)
+        .orElseThrow(() -> new ResourceNotFoundException("Task with id not found: " + taskId));
+
+        //2. Check that user is a member of the TEAM
+        teamAccessService.validateTeamAccess(task.getTeam().getId(), currentUser.getId());
+
+        // get task
+        return task;
+    }
+
+    @Transactional
+    @Override
+    public Task save(int projectId, CreateTaskRequest request) {
+        // will need to ensure User has access
+        User currentUser = authService.getCurrentUser();
+        // Check that user is a member of the TEAM
+        //1. Retrieve Project
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new ResourceNotFoundException("Project with id not found: " + projectId));
+
+        //2. Check that user is a member of the TEAM
+        teamAccessService.validateTeamAccess(project.getTeam().getId(), currentUser.getId());
+
+        // User is valid and authorized, create new task
+        Task newTask = new Task();
+        newTask.setTitle(request.getTitle());
+        newTask.setDescription(request.getDescription());
+
+        // set values based on app data
+        int nextTaskKey = taskRepository.findMaxTaskKeyByProjectId(projectId) + 1;
+        newTask.setTaskKey(nextTaskKey);
+
+        newTask.setCreatedBy(currentUser);
+        newTask.setProject(project);
+        newTask.setTeam(project.getTeam());
+
+        // Optional fields
+        if (request.getDueDate() != null) {
+            newTask.setDueDate(request.getDueDate());
+        }
+
+        if (request.getPriority() != null) {
+            newTask.setPriority(request.getPriority());
+        }
+
+        // no need to handle status, by default goes to BACKLOG
+
+        return taskRepository.save(newTask);
+    }
+
+    @Override
+    public Task update(int taskId, UpdateTeamRequest request) {
+        return null;
+    }
+
+    @Override
+    public void deleteById(int taskId) {
+
+    }
+}

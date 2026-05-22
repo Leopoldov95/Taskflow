@@ -4,6 +4,7 @@ import com.taskflow.taskflow.entity.Project;
 import com.taskflow.taskflow.entity.Team;
 import com.taskflow.taskflow.entity.enums.ProjectStatus;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 // what data we want from the project via our API
@@ -12,7 +13,7 @@ public class ProjectResponse {
     private String name;
     private String description;
     private int teamId;
-    private Date updatedAt;
+    private LocalDateTime updatedAt;
     private ProjectStatus status;
     private String projectKey;
 
@@ -43,7 +44,7 @@ public class ProjectResponse {
         return teamId;
     }
 
-    public Date getUpdatedAt() {
+    public LocalDateTime getUpdatedAt() {
         return updatedAt;
     }
 

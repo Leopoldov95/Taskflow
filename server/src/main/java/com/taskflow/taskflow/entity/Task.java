@@ -7,6 +7,7 @@ import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Entity
@@ -19,34 +20,36 @@ public class Task {
     @Column(name="id")
     private int id;
 
-    @Column(name="name", nullable = false)
-    private String name;
+    @Column(name="title", nullable = false)
+    private String title;
 
-    @Column(name="description", nullable = false)
+    @Column(name="description")
     private String description;
 
     @Column(name = "created_at")
     @CreationTimestamp
-    private Date createdAt;
+    private LocalDateTime createdAt;
 
     @Column(name="updated_at")
     @UpdateTimestamp
-    private Date updatedAt;
+    private LocalDateTime updatedAt;
 
     @Column(name="task_key", nullable = false)
     private int taskKey;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
-    private TaskStatus status;
+    private TaskStatus status = TaskStatus.BACKLOG;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "priority", nullable = false)
-    private TaskPriority priority;
+    private TaskPriority priority = TaskPriority.LOW;
 
     @Column(name = "due_date")
-    private Date dueDate;
+    private LocalDateTime dueDate;
 
     @Column(name = "deleted_at")
-    private Date deletedAt;
+    private LocalDateTime deletedAt;
 
     // Foreign Keys & Join Tables
 
@@ -66,6 +69,130 @@ public class Task {
 
     // Many tasks -> One Team
     @ManyToOne
-    @JoinColumn(name = "tasks")
+    @JoinColumn(name = "team_id")
     private Team team;
+
+    // =========================
+    // Lifecycle Hooks
+    // =========================
+
+    // By default, sets the due date to 1 week from now unless specified
+    @PrePersist
+    protected void onCreate() {
+        if (dueDate == null) {
+            dueDate = LocalDateTime.now().plusDays(7);
+        }
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
+    public int getTaskKey() {
+        return taskKey;
+    }
+
+    public void setTaskKey(int taskKey) {
+        this.taskKey = taskKey;
+    }
+
+    public TaskStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(TaskStatus status) {
+        this.status = status;
+    }
+
+    public TaskPriority getPriority() {
+        return priority;
+    }
+
+    public void setPriority(TaskPriority priority) {
+        this.priority = priority;
+    }
+
+    public LocalDateTime getDueDate() {
+        return dueDate;
+    }
+
+    public void setDueDate(LocalDateTime dueDate) {
+        this.dueDate = dueDate;
+    }
+
+    public LocalDateTime getDeletedAt() {
+        return deletedAt;
+    }
+
+    public void setDeletedAt(LocalDateTime deletedAt) {
+        this.deletedAt = deletedAt;
+    }
+
+    public Project getProject() {
+        return project;
+    }
+
+    public void setProject(Project project) {
+        this.project = project;
+    }
+
+    public User getAssignee() {
+        return assignee;
+    }
+
+    public void setAssignee(User assignee) {
+        this.assignee = assignee;
+    }
+
+    public User getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(User createdBy) {
+        this.createdBy = createdBy;
+    }
+
+    public Team getTeam() {
+        return team;
+    }
+
+    public void setTeam(Team team) {
+        this.team = team;
+    }
 }
