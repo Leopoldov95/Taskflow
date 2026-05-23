@@ -6,6 +6,7 @@ import com.taskflow.taskflow.entity.User;
 import com.taskflow.taskflow.service.TeamService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -25,23 +26,25 @@ public class TeamRestController {
 
     // expose "/teams" and get a list of users
     @GetMapping("/teams")
-    public List<TeamResponse> getTeams() {
-        return teamService.findAll()
+    public ResponseEntity<List<TeamResponse>> getTeams() {
+    List<TeamResponse> result = teamService.findAll()
                 .stream()
                 .map(TeamResponse::new)
                 .toList();
+    return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
     // Find single team by id
     @GetMapping("/teams/{teamId}")
-    public TeamResponse getTeam(@PathVariable int teamId) {
+    public ResponseEntity<TeamResponse> getTeam(@PathVariable int teamId) {
         Team theTeam = teamService.findById(teamId);
-        return new TeamResponse(theTeam);
+       TeamResponse response = new TeamResponse(theTeam);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     // Create a new Team
     @PostMapping("/teams")
-    public TeamResponse createTeam(
+    public ResponseEntity<TeamResponse> createTeam(
             @Valid @RequestBody CreateTeamRequest request,
             @AuthenticationPrincipal User currentUser) {
         // We need the user ID for this to function, as it can only be invoked by an authorized user, can just use requester's ID
@@ -57,23 +60,25 @@ public class TeamRestController {
         team.setIcon(request.getIcon());
 
         Team dbTeam = teamService.save(team, currentUser.getId());
-        return new TeamResponse(dbTeam);
+        TeamResponse response = new TeamResponse(dbTeam);
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
     // update (Patch) as existing Team
     @PatchMapping("/teams/{teamId}")
-    public TeamResponse updateTeam(@PathVariable int teamId,
+    public ResponseEntity<TeamResponse> updateTeam(@PathVariable int teamId,
                            @Valid @RequestBody UpdateTeamRequest request
     ) {
             Team dbTeam = teamService.updateTeam(teamId, request);
-            return new TeamResponse(dbTeam);
+            TeamResponse response = new TeamResponse(dbTeam);
+            return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     // delete team by id
     @DeleteMapping("/teams/{teamId}")
-    public String deleteTeam(@PathVariable int teamId) {
+    public ResponseEntity<String> deleteTeam(@PathVariable int teamId) {
         teamService.deleteById(teamId);
-        return "Team deleted: " + teamId;
+        return new ResponseEntity<>("Team deleted: " + teamId, HttpStatus.OK);
     }
 
     //////////////////////////////////////
@@ -83,11 +88,12 @@ public class TeamRestController {
     // Get all team members
     // We want a list of id, firstname, lastname, role
     @GetMapping("/teams/{teamId}/members")
-    public List<TeamMemberResponse> getTeamMembers(@PathVariable int teamId) {
-        return teamService.getTeamMembers(teamId)
+    public ResponseEntity<List<TeamMemberResponse>> getTeamMembers(@PathVariable int teamId) {
+        List<TeamMemberResponse> response = teamService.getTeamMembers(teamId)
                 .stream()
                 .map(TeamMemberResponse::new)
                 .toList();
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     // Add new team member

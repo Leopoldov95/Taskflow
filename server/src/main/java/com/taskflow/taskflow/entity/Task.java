@@ -48,9 +48,6 @@ public class Task {
     @Column(name = "due_date")
     private LocalDateTime dueDate;
 
-    @Column(name = "deleted_at")
-    private LocalDateTime deletedAt;
-
     // Foreign Keys & Join Tables
 
     // Many Tasks -> One Projects
@@ -154,14 +151,6 @@ public class Task {
 
     public void setDueDate(LocalDateTime dueDate) {
         this.dueDate = dueDate;
-    }
-
-    public LocalDateTime getDeletedAt() {
-        return deletedAt;
-    }
-
-    public void setDeletedAt(LocalDateTime deletedAt) {
-        this.deletedAt = deletedAt;
     }
 
     public Project getProject() {

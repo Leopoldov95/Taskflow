@@ -79,19 +79,13 @@ public class AppSecurityConfig {
                 .requestMatchers("/api/users").hasRole("ADMIN")
                 .requestMatchers("/api/users/**").hasRole("ADMIN")
 
-                // Team routes
-                .requestMatchers(HttpMethod.GET, "/api/teams").authenticated()
-                .requestMatchers(HttpMethod.GET, "/api/teams/**").authenticated()
-                .requestMatchers(HttpMethod.POST, "/api/teams").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.POST, "/api/teams/**").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.PATCH, "/api/teams/**").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.DELETE, "/api/teams/**").hasRole("ADMIN")
+                // Any authenticated user can read anything
+                .requestMatchers(HttpMethod.GET, "/api/**").authenticated()
 
-                // Project routes
-                .requestMatchers(HttpMethod.GET, "/api/projects/**").authenticated()
-                .requestMatchers(HttpMethod.POST, "/api/projects/**").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.PATCH, "/api/projects/**").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.DELETE, "/api/projects/**").hasRole("ADMIN")
+                // Any authenticated user can write — service layer handles finer permissions
+                .requestMatchers(HttpMethod.POST, "/api/**").authenticated()
+                .requestMatchers(HttpMethod.PATCH, "/api/**").authenticated()
+                .requestMatchers(HttpMethod.DELETE, "/api/**").authenticated()
 
                 // Everything else requires authentication
                 .anyRequest().authenticated()
@@ -117,7 +111,7 @@ public class AppSecurityConfig {
                 // Insert our JwtAuthFilter BEFORE Spring's built-in
                 // UsernamePasswordAuthenticationFilter in the filter chain.
                 // This ensures the JWT is processed first on every request.
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class); // 👈 plug in our JWT filter
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

@@ -1,14 +1,12 @@
 package com.taskflow.taskflow.dto.task;
 
 import com.taskflow.taskflow.entity.enums.TaskPriority;
-import jakarta.validation.constraints.NotBlank;
+import com.taskflow.taskflow.entity.enums.TaskStatus;
 import jakarta.validation.constraints.Size;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 
 public class UpdateTaskRequest {
-    @NotBlank(message = "Task title is required")
     @Size(min = 5, max = 100, message = "Title must be between 5 and 100 characters")
     private String title;
 
@@ -19,9 +17,9 @@ public class UpdateTaskRequest {
 
     private TaskPriority priority;
 
-    private LocalDateTime dueDate;
+    private TaskStatus status;
 
-    private LocalDateTime deletedAt;
+    private LocalDateTime dueDate;
 
     public UpdateTaskRequest() {}
 
@@ -65,11 +63,11 @@ public class UpdateTaskRequest {
         this.dueDate = dueDate;
     }
 
-    public LocalDateTime getDeletedAt() {
-        return deletedAt;
+    public TaskStatus getStatus() {
+        return status;
     }
 
-    public void setDeletedAt(LocalDateTime deletedAt) {
-        this.deletedAt = deletedAt;
+    public void setStatus(TaskStatus status) {
+        this.status = status;
     }
 }

@@ -7,6 +7,7 @@ import com.taskflow.taskflow.entity.Project;
 import com.taskflow.taskflow.service.ProjectService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,30 +26,30 @@ public class ProjectRestController {
 
     // get a list of projects
     @GetMapping("/teams/{teamId}/projects")
-    public List<ProjectResponse> projects(@PathVariable int teamId) {
-        return projectService.findAllByTeamId(teamId).stream().map(ProjectResponse::new).toList();
+    public ResponseEntity<List<ProjectResponse>> projects(@PathVariable int teamId) {
+        List<ProjectResponse> response = projectService.findAllByTeamId(teamId).stream().map(ProjectResponse::new).toList();
+        return ResponseEntity.ok(response);
     }
 
     // get a single project by id
     @GetMapping("/projects/{projectId}")
-    public ProjectResponse getProject(@PathVariable int projectId) {
+    public ResponseEntity<ProjectResponse> getProject(@PathVariable int projectId) {
         Project theProject = projectService.findById(projectId);
-
-        return new ProjectResponse(theProject);
+        return new ResponseEntity<>(new ProjectResponse(theProject), HttpStatus.OK);
     }
 
     // Create a new project
     @PostMapping("/teams/{teamId}/projects")
-    public ProjectResponse createProject(@PathVariable int teamId, @Valid @RequestBody CreateProjectRequest project) {
+    public ResponseEntity<ProjectResponse> createProject(@PathVariable int teamId, @Valid @RequestBody CreateProjectRequest project) {
         Project dbProject = projectService.save(teamId, project);
-        return new ProjectResponse(dbProject);
+        return new ResponseEntity<>(new ProjectResponse(dbProject), HttpStatus.CREATED);
     }
 
     // update (PATCH) an existing project
     @PatchMapping("/projects/{projectId}")
-    public ProjectResponse updateProject(@PathVariable int projectId, @Valid @RequestBody UpdateProjectRequest project) {
+    public ResponseEntity<ProjectResponse> updateProject(@PathVariable int projectId, @Valid @RequestBody UpdateProjectRequest project) {
         Project dbProject = projectService.update(projectId, project);
-        return new ProjectResponse(dbProject);
+        return new ResponseEntity<>(new ProjectResponse(dbProject), HttpStatus.OK);
     }
 
     // delete project by id

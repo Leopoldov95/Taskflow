@@ -4,6 +4,8 @@ import com.taskflow.taskflow.dto.user.UserResponse;
 import com.taskflow.taskflow.entity.User;
 import com.taskflow.taskflow.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -31,18 +33,19 @@ public class UserRestController {
 
     // expose "/users" and get a list of users
     @GetMapping("/users")
-    public List<UserResponse> getUsers() {
-        return userService.findAll().stream()
+    public ResponseEntity<List<UserResponse>> getUsers() {
+        List<UserResponse> response = userService.findAll().stream()
                 .map(this::mapToResponse)
                 .toList();
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     // Get a single user by id
     @GetMapping("/users/{userId}")
-    public UserResponse getUser(@PathVariable int userId) {
+    public ResponseEntity<UserResponse> getUser(@PathVariable int userId) {
         User theUser = userService.findById(userId);
 
-        return mapToResponse(theUser);
+        return new ResponseEntity<>(mapToResponse(theUser), HttpStatus.OK);
     }
 
     // Create a new User
@@ -58,7 +61,7 @@ public class UserRestController {
 
     // Delete User by id
     @DeleteMapping("/users/{userId}")
-    public String deleteUser(@PathVariable int userId) {
+    public ResponseEntity<String> deleteUser(@PathVariable int userId) {
         User tempUser = userService.findById(userId);
 
           // throw exception if null
@@ -69,6 +72,6 @@ public class UserRestController {
 
           userService.deleteById(userId);
 
-          return "Deleted user id - " + userId;
+          return new ResponseEntity<>("Deleted user id - " + userId, HttpStatus.OK);
     }
 }

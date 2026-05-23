@@ -1,13 +1,17 @@
 package com.taskflow.taskflow.exception;
 
 import com.taskflow.taskflow.dto.ErrorResponse;
+import com.taskflow.taskflow.utils.ExceptionUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import tools.jackson.databind.exc.InvalidFormatException;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -54,5 +58,26 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(DuplicateResourceException.class)
     public ResponseEntity<ErrorResponse> handleDuplicateResourceException(DuplicateResourceException e) {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse(409, e.getMessage()));
+    }
+
+    // 400 - Bad Request for ENUMs
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ErrorResponse> handleEnumErrors(HttpMessageNotReadableException ex) {
+
+        Throwable cause = ex.getCause();
+
+        if (cause instanceof InvalidFormatException ife &&
+                ife.getTargetType().isEnum()) {
+
+            return ResponseEntity.badRequest().body(
+                    new ErrorResponse(
+                            400,
+                            ExceptionUtils.buildEnumErrorMessage(ife)
+                    )
+            );
+        }
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new ErrorResponse(400, "Malformed JSON request"));
     }
 }

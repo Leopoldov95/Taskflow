@@ -2,7 +2,7 @@ package com.taskflow.taskflow.service;
 
 import com.taskflow.taskflow.dao.*;
 import com.taskflow.taskflow.dto.task.CreateTaskRequest;
-import com.taskflow.taskflow.dto.team.UpdateTeamRequest;
+import com.taskflow.taskflow.dto.task.UpdateTaskRequest;
 import com.taskflow.taskflow.entity.Project;
 import com.taskflow.taskflow.entity.Task;
 import com.taskflow.taskflow.entity.User;
@@ -113,12 +113,36 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public Task update(int taskId, UpdateTeamRequest request) {
-        return null;
+    public Task update(int taskId, UpdateTaskRequest request) {
+        User currentUser = authService.getCurrentUser();
+        // check Task exists
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new ResourceNotFoundException("Task with id not found: " + taskId));
+
+        // ensure user is a member of the Team owning the task
+        teamAccessService.validateTeamAccess(task.getTeam().getId(), currentUser.getId());
+
+        // set the new Task updates
+        if (request.getDueDate() != null) task.setDueDate(request.getDueDate());
+        if (request.getPriority() != null) task.setPriority(request.getPriority());
+        if (request.getStatus() != null) task.setStatus(request.getStatus());
+        if (request.getTitle() != null) task.setTitle(request.getTitle());
+        if (request.getDescription() != null) task.setDescription(request.getDescription());
+
+        return taskRepository.save(task);
     }
 
     @Override
     public void deleteById(int taskId) {
+        User currentUser = authService.getCurrentUser();
+        // check Task exists
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new ResourceNotFoundException("Task with id not found: " + taskId));
 
+        // ensure user is a member of the Team owning the task
+        teamAccessService.validateTeamAccess(task.getTeam().getId(), currentUser.getId());
+
+        // remove form BD
+        taskRepository.delete(task);
     }
 }

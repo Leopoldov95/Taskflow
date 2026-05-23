@@ -21,7 +21,6 @@ public class TaskResponse {
     private TaskStatus status;
     private TaskPriority priority;
     private LocalDateTime dueDate;
-    private LocalDateTime deletedAt;
     private ProjectSummary project;
     private UserSummary assignee;
     private UserSummary createdBy;
@@ -37,7 +36,6 @@ public class TaskResponse {
         this.status = task.getStatus();
         this.priority = task.getPriority();
         this.dueDate = task.getDueDate();
-        this.deletedAt = task.getDeletedAt();
         this.project = new ProjectSummary(task.getProject());
         // need to handle cases where assignee is null
         this.assignee = task.getAssignee() != null
@@ -80,10 +78,6 @@ public class TaskResponse {
 
     public LocalDateTime getDueDate() {
         return dueDate;
-    }
-
-    public LocalDateTime getDeletedAt() {
-        return deletedAt;
     }
 
     public ProjectSummary getProject() {

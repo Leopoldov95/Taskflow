@@ -92,17 +92,8 @@ public class TeamServiceImpl implements TeamService {
             User currentUser = authService.getCurrentUser();
 
             Team team = teamRepository.findById(teamId).orElseThrow(() -> new ResourceNotFoundException("Team not found"));
-//
-//        // Check requesting user is an OWNER of this team
-//        TeamMember membership = teamMemberRepository
-//                .findByTeamIdAndUserId(teamId, currentUser.getId())
-//                .orElseThrow(() -> new AccessDeniedException("Not a member of this team"));
 
-        //teamAccessService.validateTeamAccess(teamId, currentUser.getId());
         teamAccessService.validateOwnerAccess(teamId, currentUser.getId());
-//        if (membership.getRole() != TeamRole.OWNER) {
-//            throw new AccessDeniedException("Only team owners can update the team");
-//        }
 
         // update fields only if present
         if(request.getName() != null) team.setName(request.getName());
@@ -136,30 +127,12 @@ public class TeamServiceImpl implements TeamService {
         User currentUser = authService.getCurrentUser();
         teamAccessService.validateOwnerAccess(teamId, currentUser.getId());
 
-//        teamRepository.findById(teamId).orElseThrow(() -> new ResourceNotFoundException("Team not found"));
-//
-//        // Must be a team member or owner to view the list of members
-//        if (!teamMemberRepository.existsByTeamIdAndUserId(teamId, currentUser.getId())) {
-//            throw new AccessDeniedException("Not a member of this team");
-//        }
-
         return teamMemberRepository.findByTeamId(teamId);
     }
 
     // NOTE ~ On the client side will need a way to handle this to avoid multiple requests
     @Override
     public void addTeamMembers(int teamId, ManageTeamMemberRequest request) {
-//        Team team = teamRepository.findById(teamId)
-//                .orElseThrow(() -> new ResourceNotFoundException("Team not found"));
-//
-//        // Only OWNER can add members
-//        TeamMember membership = teamMemberRepository
-//                .findByTeamIdAndUserId(teamId, currentUser.getId())
-//                .orElseThrow(() -> new AccessDeniedException("Not a member of this team"));
-//
-//        if (membership.getRole() != TeamRole.OWNER) {
-//            throw new AccessDeniedException("Only owners can add members");
-//        }
 
         User currentUser = authService.getCurrentUser();
         // ensure user has correct team acccess
@@ -169,7 +142,6 @@ public class TeamServiceImpl implements TeamService {
 
 
         // Add each userId to team
-        // Wow this is clean
         for (Integer userId : request.getUserIds()) {
             // skip if already a member (On client side should be disabled or not visible)
             if (teamMemberRepository.existsByTeamIdAndUserId(teamId, userId)) {
