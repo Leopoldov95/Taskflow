@@ -208,7 +208,7 @@ public class TaskServiceImpl implements TaskService {
         }
 
         // update fields
-        if (request.getContent() != null) taskComment.setContent(request.getContent());
+        taskComment.setContent(request.getContent());
 
         return taskCommentRepository.save(taskComment);
     }

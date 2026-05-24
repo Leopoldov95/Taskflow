@@ -80,7 +80,7 @@ public class TaskRestController {
     }
 
     // update an existing comment
-    @PatchMapping("/comments/{commentId}")
+    @PutMapping("/comments/{commentId}")
     public ResponseEntity<TaskCommentResponse> updateTaskComment(@PathVariable int commentId,
                                                                  @Valid @RequestBody UpdateTaskCommentRequest request) {
         TaskComment taskComment = taskService.updateComment(commentId, request);

@@ -6,6 +6,7 @@ import com.taskflow.taskflow.dto.user.UpdateUserPasswordRequest;
 import com.taskflow.taskflow.dto.user.UpdateUserRequest;
 import com.taskflow.taskflow.entity.User;
 import com.taskflow.taskflow.exception.BadRequestException;
+import com.taskflow.taskflow.exception.DuplicateResourceException;
 import com.taskflow.taskflow.exception.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -60,8 +61,16 @@ public class UserServiceImpl implements UserService {
 
         if (request.getFirstName() != null) user.setFirstName(request.getFirstName());
         if (request.getLastName() != null) user.setLastName(request.getLastName());
-        if (request.getEmail() != null) user.setEmail(request.getEmail());
-
+        // need to ensure email remains unique
+        if (request.getEmail() != null) {
+            // check that email not already in use
+            if (userRepository.existsByEmail(request.getEmail())) {
+                throw new DuplicateResourceException(
+                        "Email already in use"
+                );
+            }
+            user.setEmail(request.getEmail());
+        }
         userRepository.save(user);
         return user;
     }

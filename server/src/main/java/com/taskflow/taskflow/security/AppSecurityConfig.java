@@ -76,7 +76,8 @@ public class AppSecurityConfig {
                 // Login/register endpoints — no token needed (e.g. how would we
                 // have a token before logging in?)
                 .requestMatchers("/api/v1/auth/**").permitAll()
-
+                // actuator enpoints
+                .requestMatchers("/actuator/health").permitAll()
                 // Me routes — any authenticated user can access profie
                 .requestMatchers("/api/v1/me/**").authenticated()
 

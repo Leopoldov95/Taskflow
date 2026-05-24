@@ -8,6 +8,7 @@ import com.taskflow.taskflow.dto.auth.RegisterRequest;
 import com.taskflow.taskflow.entity.Role;
 import com.taskflow.taskflow.entity.User;
 import com.taskflow.taskflow.entity.enums.RoleType;
+import com.taskflow.taskflow.exception.DuplicateResourceException;
 import com.taskflow.taskflow.security.JwtService;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -38,6 +39,13 @@ public class AuthService {
 
     // register a new user and return a token
     public AuthResponse register(RegisterRequest request) {
+        // check that email not already in use
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new DuplicateResourceException(
+                    "Email already in use"
+            );
+        }
+
         User user = new User();
         user.setFirstName(request.getFirstName());
         user.setLastName(request.getLastName());
