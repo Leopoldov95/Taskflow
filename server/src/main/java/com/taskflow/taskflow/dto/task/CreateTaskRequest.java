@@ -1,6 +1,7 @@
 package com.taskflow.taskflow.dto.task;
 
 import com.taskflow.taskflow.entity.enums.TaskPriority;
+import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
@@ -19,6 +20,7 @@ public class CreateTaskRequest {
 
     private TaskPriority priority;
 
+    @FutureOrPresent
     private LocalDateTime dueDate;
 
     public CreateTaskRequest() {}

@@ -12,6 +12,7 @@ import com.taskflow.taskflow.entity.TaskComment;
 import com.taskflow.taskflow.service.TaskService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -29,13 +30,12 @@ public class TaskRestController {
     }
 
     // get all tasks for a project
-    // NOTE - May want to limit to a certain amount (e.g. 50 tasks) then load more on request
     @GetMapping("/projects/{projectId}/tasks")
-    public ResponseEntity<List<TaskResponse>> tasks(@PathVariable int projectId) {
-        List<TaskResponse> response = taskService.findAllByProjectId(projectId)
-                .stream()
-                .map(TaskResponse::new)
-                .toList();
+    public ResponseEntity<Page<TaskResponse>> tasks(
+            @PathVariable int projectId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "30") int size) {
+        Page<TaskResponse> response = taskService.findAllByProjectId(projectId, page, size);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 

@@ -2,6 +2,7 @@ package com.taskflow.taskflow.dto.task;
 
 import com.taskflow.taskflow.entity.enums.TaskPriority;
 import com.taskflow.taskflow.entity.enums.TaskStatus;
+import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.Size;
 
 import java.time.LocalDateTime;
@@ -19,6 +20,7 @@ public class UpdateTaskRequest {
 
     private TaskStatus status;
 
+    @FutureOrPresent
     private LocalDateTime dueDate;
 
     public UpdateTaskRequest() {}

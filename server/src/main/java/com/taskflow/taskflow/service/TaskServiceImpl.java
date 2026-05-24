@@ -12,9 +12,14 @@ import com.taskflow.taskflow.entity.User;
 import com.taskflow.taskflow.exception.ResourceNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
+import com.taskflow.taskflow.dto.task.TaskResponse;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -46,7 +51,8 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public List<Task> findAllByProjectId(int projectId) {
+    public Page<TaskResponse> findAllByProjectId(int projectId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
         // will need to ensure User is part of the project
         User currentUser = authService.getCurrentUser();
 
@@ -58,7 +64,9 @@ public class TaskServiceImpl implements TaskService {
         teamAccessService.validateTeamAccess(project.getTeam().getId(), currentUser.getId());
 
         // get all tasks for that project
-        return taskRepository.findAllByProjectId(projectId);
+        Page<Task> tasks = taskRepository.findAllByProjectId(projectId, pageable);
+
+        return tasks.map(TaskResponse::new);
     }
 
     @Override
@@ -105,6 +113,11 @@ public class TaskServiceImpl implements TaskService {
 
         // Optional fields
         if (request.getDueDate() != null) {
+            if (request.getDueDate().isBefore(LocalDateTime.now())) {
+                throw new IllegalArgumentException(
+                        "Due date cannot be in the past"
+                );
+            }
             newTask.setDueDate(request.getDueDate());
         }
 
@@ -128,7 +141,15 @@ public class TaskServiceImpl implements TaskService {
         teamAccessService.validateTeamAccess(task.getTeam().getId(), currentUser.getId());
 
         // set the new Task updates
-        if (request.getDueDate() != null) task.setDueDate(request.getDueDate());
+        // ensure due date cannot be before createdAt date
+        if (request.getDueDate() != null) {
+            if (request.getDueDate().isBefore(task.getCreatedAt())) {
+                throw new IllegalArgumentException(
+                        "Due date cannot be in the past"
+                );
+            }
+            task.setDueDate(request.getDueDate());
+        }
         if (request.getPriority() != null) task.setPriority(request.getPriority());
         if (request.getStatus() != null) task.setStatus(request.getStatus());
         if (request.getTitle() != null) task.setTitle(request.getTitle());
