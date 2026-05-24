@@ -29,7 +29,8 @@ public class JwtService {
     private String secretKey;
 
     // Token valid for 24 hours
-    private static final long EXPIRATION_TIME = 1000 * 60 * 60 * 24;
+    @Value("${security.jwt.expiration}")
+    private long EXPIRATION_TIME;
 
     /**
      * Public entry point: generate a plain token with no extra claims.

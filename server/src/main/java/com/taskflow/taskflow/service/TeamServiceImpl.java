@@ -14,8 +14,6 @@ import com.taskflow.taskflow.exception.ResourceNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.security.access.AccessDeniedException;
-
 
 import java.util.List;
 import java.util.Optional;

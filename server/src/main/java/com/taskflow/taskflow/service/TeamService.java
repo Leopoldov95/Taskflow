@@ -4,7 +4,6 @@ import com.taskflow.taskflow.dto.team.ManageTeamMemberRequest;
 import com.taskflow.taskflow.dto.team.UpdateTeamRequest;
 import com.taskflow.taskflow.entity.Team;
 import com.taskflow.taskflow.entity.TeamMember;
-import com.taskflow.taskflow.entity.User;
 
 import java.util.List;
 

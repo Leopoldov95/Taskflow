@@ -6,6 +6,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface ProjectRepository extends JpaRepository<Project, Integer> {
-    // so we'll never need a query to fetch all projects (for now)
+    // Will only fetch multiple projects when given team is
     List<Project> findAllByTeamId(int teamId);
 }

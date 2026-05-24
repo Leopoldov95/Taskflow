@@ -1,9 +1,6 @@
 package com.taskflow.taskflow.dto.project;
 
-import com.taskflow.taskflow.entity.Team;
 import com.taskflow.taskflow.entity.enums.ProjectStatus;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 public class UpdateProjectRequest {

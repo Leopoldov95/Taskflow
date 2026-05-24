@@ -1,13 +1,7 @@
 package com.taskflow.taskflow.dto.project;
 
-import com.taskflow.taskflow.entity.Team;
-import com.taskflow.taskflow.entity.enums.ProjectStatus;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
-
-import java.util.Date;
-
-// details we want from Users to create a Projet
 
 public class CreateProjectRequest {
 

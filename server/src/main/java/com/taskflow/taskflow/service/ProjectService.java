@@ -1,8 +1,8 @@
 package com.taskflow.taskflow.service;
+
 import com.taskflow.taskflow.dto.project.CreateProjectRequest;
 import com.taskflow.taskflow.dto.project.UpdateProjectRequest;
 import com.taskflow.taskflow.entity.Project;
-import com.taskflow.taskflow.entity.User;
 
 import java.util.List;
 

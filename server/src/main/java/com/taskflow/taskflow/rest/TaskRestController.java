@@ -1,9 +1,14 @@
 package com.taskflow.taskflow.rest;
 
 import com.taskflow.taskflow.dto.task.CreateTaskRequest;
+import com.taskflow.taskflow.dto.task.TaskDetailResponse;
 import com.taskflow.taskflow.dto.task.TaskResponse;
 import com.taskflow.taskflow.dto.task.UpdateTaskRequest;
+import com.taskflow.taskflow.dto.taskcomment.CreateTaskCommentRequest;
+import com.taskflow.taskflow.dto.taskcomment.TaskCommentResponse;
+import com.taskflow.taskflow.dto.taskcomment.UpdateTaskCommentRequest;
 import com.taskflow.taskflow.entity.Task;
+import com.taskflow.taskflow.entity.TaskComment;
 import com.taskflow.taskflow.service.TaskService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +19,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api")
 public class TaskRestController {
 
     private final TaskService taskService;
@@ -37,9 +41,9 @@ public class TaskRestController {
 
     // get single task
     @GetMapping("/tasks/{taskId}")
-    public ResponseEntity<TaskResponse> task(@PathVariable int taskId) {
+    public ResponseEntity<TaskDetailResponse> task(@PathVariable int taskId) {
         Task task = taskService.findById(taskId);
-        return new ResponseEntity<>(new TaskResponse(task), HttpStatus.OK);
+        return new ResponseEntity<>(new TaskDetailResponse(task), HttpStatus.OK);
     }
 
     // create a new task
@@ -60,7 +64,34 @@ public class TaskRestController {
     @DeleteMapping("/tasks/{taskId}")
     public ResponseEntity<String> deleteTask(@PathVariable int taskId) {
         taskService.deleteById(taskId);
-        return new ResponseEntity<>("Task Deleted" + taskId, HttpStatus.OK);
+        return new ResponseEntity<>("Task Deleted: " + taskId, HttpStatus.OK);
+    }
+
+    //------------------
+    // TASK COMMENTS
+    //-----------------
+
+    // create a new comment
+    @PostMapping("/tasks/{taskId}/comments")
+    public ResponseEntity<TaskCommentResponse> saveTaskComment(@PathVariable int taskId,
+                                                               @Valid @RequestBody CreateTaskCommentRequest request) {
+        TaskComment taskComment = taskService.saveComment(taskId, request);
+        return new ResponseEntity<>(new TaskCommentResponse(taskComment), HttpStatus.CREATED);
+    }
+
+    // update an existing comment
+    @PatchMapping("/comments/{commentId}")
+    public ResponseEntity<TaskCommentResponse> updateTaskComment(@PathVariable int commentId,
+                                                                 @Valid @RequestBody UpdateTaskCommentRequest request) {
+        TaskComment taskComment = taskService.updateComment(commentId, request);
+        return new ResponseEntity<>(new TaskCommentResponse(taskComment), HttpStatus.OK);
+    }
+
+    // delete a comment
+    @DeleteMapping("/comments/{commentId}")
+    public ResponseEntity<String> deleteTaskComment(@PathVariable int commentId) {
+        taskService.deleteComment(commentId);
+        return new ResponseEntity<>("Comment Deleted: " + commentId, HttpStatus.OK);
     }
 
 }

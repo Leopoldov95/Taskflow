@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/users")
 public class UserRestController {
     private UserService userService;
 
@@ -32,7 +32,7 @@ public class UserRestController {
     }
 
     // expose "/users" and get a list of users
-    @GetMapping("/users")
+    @GetMapping()
     public ResponseEntity<List<UserResponse>> getUsers() {
         List<UserResponse> response = userService.findAll().stream()
                 .map(this::mapToResponse)
@@ -41,7 +41,7 @@ public class UserRestController {
     }
 
     // Get a single user by id
-    @GetMapping("/users/{userId}")
+    @GetMapping("/{userId}")
     public ResponseEntity<UserResponse> getUser(@PathVariable int userId) {
         User theUser = userService.findById(userId);
 
@@ -60,7 +60,7 @@ public class UserRestController {
     // Deleted methods to updated user, that'll only be handled in the Authentication layer
 
     // Delete User by id
-    @DeleteMapping("/users/{userId}")
+    @DeleteMapping("/{userId}")
     public ResponseEntity<String> deleteUser(@PathVariable int userId) {
         User tempUser = userService.findById(userId);
 

@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/teams")
 public class TeamRestController {
 
     private TeamService teamService;
@@ -25,7 +25,7 @@ public class TeamRestController {
     }
 
     // expose "/teams" and get a list of users
-    @GetMapping("/teams")
+    @GetMapping
     public ResponseEntity<List<TeamResponse>> getTeams() {
     List<TeamResponse> result = teamService.findAll()
                 .stream()
@@ -35,7 +35,7 @@ public class TeamRestController {
     }
 
     // Find single team by id
-    @GetMapping("/teams/{teamId}")
+    @GetMapping("/{teamId}")
     public ResponseEntity<TeamResponse> getTeam(@PathVariable int teamId) {
         Team theTeam = teamService.findById(teamId);
        TeamResponse response = new TeamResponse(theTeam);
@@ -43,7 +43,7 @@ public class TeamRestController {
     }
 
     // Create a new Team
-    @PostMapping("/teams")
+    @PostMapping()
     public ResponseEntity<TeamResponse> createTeam(
             @Valid @RequestBody CreateTeamRequest request,
             @AuthenticationPrincipal User currentUser) {
@@ -65,7 +65,7 @@ public class TeamRestController {
     }
 
     // update (Patch) as existing Team
-    @PatchMapping("/teams/{teamId}")
+    @PatchMapping("/{teamId}")
     public ResponseEntity<TeamResponse> updateTeam(@PathVariable int teamId,
                            @Valid @RequestBody UpdateTeamRequest request
     ) {
@@ -75,7 +75,7 @@ public class TeamRestController {
     }
 
     // delete team by id
-    @DeleteMapping("/teams/{teamId}")
+    @DeleteMapping("/{teamId}")
     public ResponseEntity<String> deleteTeam(@PathVariable int teamId) {
         teamService.deleteById(teamId);
         return new ResponseEntity<>("Team deleted: " + teamId, HttpStatus.OK);
@@ -87,7 +87,7 @@ public class TeamRestController {
 
     // Get all team members
     // We want a list of id, firstname, lastname, role
-    @GetMapping("/teams/{teamId}/members")
+    @GetMapping("/{teamId}/members")
     public ResponseEntity<List<TeamMemberResponse>> getTeamMembers(@PathVariable int teamId) {
         List<TeamMemberResponse> response = teamService.getTeamMembers(teamId)
                 .stream()
@@ -97,7 +97,7 @@ public class TeamRestController {
     }
 
     // Add new team member
-    @PostMapping("/teams/{teamId}/members")
+    @PostMapping("/{teamId}/members")
     public ResponseEntity<String> addTeamMember(
             @PathVariable int teamId,
             @Valid @RequestBody ManageTeamMemberRequest request) {
@@ -106,7 +106,7 @@ public class TeamRestController {
     }
 
     // Remove (Delete) team member(s)
-    @DeleteMapping("/teams/{teamId}/members")
+    @DeleteMapping("/{teamId}/members")
     public ResponseEntity<String> deleteTeamMember(
             @PathVariable int teamId,
             @Valid @RequestBody ManageTeamMemberRequest request

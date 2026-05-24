@@ -3,20 +3,24 @@ package com.taskflow.taskflow.service;
 import com.taskflow.taskflow.dao.*;
 import com.taskflow.taskflow.dto.task.CreateTaskRequest;
 import com.taskflow.taskflow.dto.task.UpdateTaskRequest;
+import com.taskflow.taskflow.dto.taskcomment.CreateTaskCommentRequest;
+import com.taskflow.taskflow.dto.taskcomment.UpdateTaskCommentRequest;
 import com.taskflow.taskflow.entity.Project;
 import com.taskflow.taskflow.entity.Task;
+import com.taskflow.taskflow.entity.TaskComment;
 import com.taskflow.taskflow.entity.User;
 import com.taskflow.taskflow.exception.ResourceNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class TaskServiceImpl implements TaskService {
 
+    private final TaskCommentRepository taskCommentRepository;
     private TaskRepository taskRepository;
     private ProjectRepository projectRepository;
     private TeamRepository teamRepository;
@@ -30,14 +34,15 @@ public class TaskServiceImpl implements TaskService {
                            TeamRepository teamRepository,
                            TeamMemberRepository teamMemberRepository,
                            TeamAccessService teamAccessService,
-                           AuthService authService
-                           ) {
+                           AuthService authService,
+                           TaskCommentRepository taskCommentRepository) {
         this.taskRepository = taskRepository;
         this.projectRepository = projectRepository;
         this.teamRepository = teamRepository;
         this.teamMemberRepository = teamMemberRepository;
         this.teamAccessService = teamAccessService;
         this.authService = authService;
+        this.taskCommentRepository = taskCommentRepository;
     }
 
     @Override
@@ -144,5 +149,61 @@ public class TaskServiceImpl implements TaskService {
 
         // remove form BD
         taskRepository.delete(task);
+    }
+
+    //------------------------
+    // TASK COMMENTS
+    //----------------------
+
+    @Override
+    public TaskComment saveComment(int taskId, CreateTaskCommentRequest request) {
+        User currentUser = authService.getCurrentUser();
+        // check Task exists
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new ResourceNotFoundException("Task with id not found: " + taskId));
+
+        // ensure user is a member of the Team owning the task
+        teamAccessService.validateTeamAccess(task.getTeam().getId(), currentUser.getId());
+
+        // create the new task comment
+        TaskComment taskComment = new TaskComment();
+        taskComment.setContent(request.getContent());
+        taskComment.setCreatedBy(currentUser);
+        taskComment.setTask(task);
+
+        return taskCommentRepository.save(taskComment);
+    }
+
+    @Override
+    public TaskComment updateComment(int taskCommentId, UpdateTaskCommentRequest request) {
+        User currentUser = authService.getCurrentUser();
+        // check Task exists
+        TaskComment taskComment = taskCommentRepository.findById(taskCommentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Task Comment with id not found: " + taskCommentId));
+
+        // ensure user is comment owner
+        if (taskComment.getCreatedBy().getId() != currentUser.getId()) {
+            throw new AccessDeniedException("Must be comment owner to update task comment");
+        }
+
+        // update fields
+        if (request.getContent() != null) taskComment.setContent(request.getContent());
+
+        return taskCommentRepository.save(taskComment);
+    }
+
+    @Override
+    public void deleteComment(int taskCommentId) {
+        User currentUser = authService.getCurrentUser();
+        // check Task exists
+        TaskComment taskComment = taskCommentRepository.findById(taskCommentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Task Comment with id not found: " + taskCommentId));
+
+        // ensure user is comment owner
+        if (taskComment.getCreatedBy().getId() != currentUser.getId()) {
+            throw new AccessDeniedException("Must be comment owner to delete task comment");
+        }
+        // remove from DB
+        taskCommentRepository.delete(taskComment);
     }
 }

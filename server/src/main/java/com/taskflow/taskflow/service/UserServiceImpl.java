@@ -4,7 +4,6 @@ import com.taskflow.taskflow.dao.RoleRepository;
 import com.taskflow.taskflow.dao.UserRepository;
 import com.taskflow.taskflow.dto.user.UpdateUserPasswordRequest;
 import com.taskflow.taskflow.dto.user.UpdateUserRequest;
-import com.taskflow.taskflow.dto.user.UserResponse;
 import com.taskflow.taskflow.entity.User;
 import com.taskflow.taskflow.exception.BadRequestException;
 import com.taskflow.taskflow.exception.ResourceNotFoundException;

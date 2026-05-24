@@ -68,24 +68,29 @@ public class AppSecurityConfig {
                 // OPTIONS requests are pre-flight CORS checks sent by browsers
                 // before the real request. They must always be allowed through.
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                // Allow all to access Swagger API
+                .requestMatchers(
+                        "/swagger-ui/**",
+                        "/v3/api-docs/**"
+                ).permitAll()
                 // Login/register endpoints — no token needed (e.g. how would we
                 // have a token before logging in?)
-                .requestMatchers("/api/auth/**").permitAll()
+                .requestMatchers("/api/v1/auth/**").permitAll()
 
                 // Me routes — any authenticated user can access profie
-                .requestMatchers("/api/me/**").authenticated()
+                .requestMatchers("/api/v1/me/**").authenticated()
 
                 // User routes — admin only
-                .requestMatchers("/api/users").hasRole("ADMIN")
-                .requestMatchers("/api/users/**").hasRole("ADMIN")
+                .requestMatchers("/api/v1/users").hasRole("ADMIN")
+                .requestMatchers("/api/v1/users/**").hasRole("ADMIN")
 
                 // Any authenticated user can read anything
-                .requestMatchers(HttpMethod.GET, "/api/**").authenticated()
+                .requestMatchers(HttpMethod.GET, "/api/v1/**").authenticated()
 
                 // Any authenticated user can write — service layer handles finer permissions
-                .requestMatchers(HttpMethod.POST, "/api/**").authenticated()
-                .requestMatchers(HttpMethod.PATCH, "/api/**").authenticated()
-                .requestMatchers(HttpMethod.DELETE, "/api/**").authenticated()
+                .requestMatchers(HttpMethod.POST, "/api/v1/**").authenticated()
+                .requestMatchers(HttpMethod.PATCH, "/api/v1/**").authenticated()
+                .requestMatchers(HttpMethod.DELETE, "/api/v1/**").authenticated()
 
                 // Everything else requires authentication
                 .anyRequest().authenticated()

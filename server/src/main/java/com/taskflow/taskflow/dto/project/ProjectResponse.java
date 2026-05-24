@@ -1,11 +1,9 @@
 package com.taskflow.taskflow.dto.project;
 
 import com.taskflow.taskflow.entity.Project;
-import com.taskflow.taskflow.entity.Team;
 import com.taskflow.taskflow.entity.enums.ProjectStatus;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 
 // what data we want from the project via our API
 public class ProjectResponse {

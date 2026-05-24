@@ -11,7 +11,7 @@ public interface TaskRepository extends JpaRepository<Task, Integer> {
     // custom JPA logic
     List<Task> findAllByProjectId(int projectId);
 
-    // custom query to get correct Task Key
+    // custom query to get correct Task Key (must increment per new task)
     @Query("SELECT COALESCE(MAX(t.taskKey), 0) FROM Task t WHERE t.project.id = :projectId")
     int findMaxTaskKeyByProjectId(@Param("projectId") int projectId);
 }

@@ -1,6 +1,5 @@
 package com.taskflow.taskflow.entity;
 
-import com.taskflow.taskflow.entity.enums.RoleType;
 import com.taskflow.taskflow.entity.enums.TaskPriority;
 import com.taskflow.taskflow.entity.enums.TaskStatus;
 import jakarta.persistence.*;
@@ -8,7 +7,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
-import java.util.Date;
+import java.util.List;
 
 @Entity
 @Table(name = "tasks")
@@ -69,6 +68,10 @@ public class Task {
     @JoinColumn(name = "team_id")
     private Team team;
 
+    // Task Comments
+    @OneToMany(mappedBy = "task", fetch = FetchType.LAZY)
+    private List<TaskComment> comments;
+
     // =========================
     // Lifecycle Hooks
     // =========================
@@ -80,6 +83,8 @@ public class Task {
             dueDate = LocalDateTime.now().plusDays(7);
         }
     }
+
+    public Task () {}
 
     public int getId() {
         return id;
@@ -183,5 +188,13 @@ public class Task {
 
     public void setTeam(Team team) {
         this.team = team;
+    }
+
+    public List<TaskComment> getComments() {
+        return comments;
+    }
+
+    public void setComments(List<TaskComment> comments) {
+        this.comments = comments;
     }
 }

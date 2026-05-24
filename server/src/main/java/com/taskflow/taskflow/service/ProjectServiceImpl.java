@@ -7,15 +7,12 @@ import com.taskflow.taskflow.dto.project.CreateProjectRequest;
 import com.taskflow.taskflow.dto.project.UpdateProjectRequest;
 import com.taskflow.taskflow.entity.Project;
 import com.taskflow.taskflow.entity.Team;
-import com.taskflow.taskflow.entity.TeamMember;
 import com.taskflow.taskflow.entity.User;
 import com.taskflow.taskflow.exception.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class ProjectServiceImpl implements ProjectService {
