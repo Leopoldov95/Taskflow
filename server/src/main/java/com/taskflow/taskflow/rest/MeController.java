@@ -11,7 +11,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/me")
+@RequestMapping("/api/v1/me")
 public class MeController {
 
     private final UserService userService;

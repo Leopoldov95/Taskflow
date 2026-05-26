@@ -148,30 +148,30 @@ CREATE TABLE `task_comments` (
 
 -- Create Document table
 
-CREATE TABLE `documents` (
-	id INT NOT NULL AUTO_INCREMENT,
-	created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-	created_by INT NOT NULL,
-	title VARCHAR(100) NOT NULL,
-	last_modified_by INT,
-	content TEXT NOT NULL,
-	task_id INT NULL,
-    comment_id INT NULL,
-	PRIMARY KEY (id),
-	INDEX (created_by),
-	INDEX (last_modified_by),
-	INDEX (task_id),
-	INDEX (comment_id),
-	CONSTRAINT fk_document_creator_id FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE RESTRICT,
-	CONSTRAINT fk_document_modified_id FOREIGN KEY (last_modified_by) REFERENCES users(id) ON DELETE SET NULL,
-	CONSTRAINT fk_document_task_id FOREIGN KEY (task_id) REFERENCES tasks(id) ON DELETE CASCADE,
-    CONSTRAINT fk_document_comment_id FOREIGN KEY (comment_id) REFERENCES task_comments(id) ON DELETE CASCADE,
-    CONSTRAINT check_document_owner CHECK (
-    	(task_id IS NOT NULL AND comment_id IS NULL) OR
-    	(task_id IS NULL AND comment_id IS NOT NULL)
-	)
-);
+-- CREATE TABLE `documents` (
+-- 	id INT NOT NULL AUTO_INCREMENT,
+-- 	created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+-- 	updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+-- 	created_by INT NOT NULL,
+-- 	title VARCHAR(100) NOT NULL,
+-- 	last_modified_by INT,
+-- 	content TEXT NOT NULL,
+-- 	task_id INT NULL,
+--     comment_id INT NULL,
+-- 	PRIMARY KEY (id),
+-- 	INDEX (created_by),
+-- 	INDEX (last_modified_by),
+-- 	INDEX (task_id),
+-- 	INDEX (comment_id),
+-- 	CONSTRAINT fk_document_creator_id FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE RESTRICT,
+-- 	CONSTRAINT fk_document_modified_id FOREIGN KEY (last_modified_by) REFERENCES users(id) ON DELETE SET NULL,
+-- 	CONSTRAINT fk_document_task_id FOREIGN KEY (task_id) REFERENCES tasks(id) ON DELETE CASCADE,
+--     CONSTRAINT fk_document_comment_id FOREIGN KEY (comment_id) REFERENCES task_comments(id) ON DELETE CASCADE,
+--     CONSTRAINT check_document_owner CHECK (
+--     	(task_id IS NOT NULL AND comment_id IS NULL) OR
+--     	(task_id IS NULL AND comment_id IS NOT NULL)
+-- 	)
+-- );
 
 -- Define additional FOREIGN KEYS and CONSTRAINST
 
