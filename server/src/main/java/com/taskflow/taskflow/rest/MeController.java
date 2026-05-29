@@ -1,10 +1,13 @@
 package com.taskflow.taskflow.rest;
 
+import com.taskflow.taskflow.dto.auth.AuthResponse;
 import com.taskflow.taskflow.dto.user.UpdateUserPasswordRequest;
 import com.taskflow.taskflow.dto.user.UpdateUserRequest;
+import com.taskflow.taskflow.dto.user.UpdateUserResponse;
 import com.taskflow.taskflow.dto.user.UserResponse;
 import com.taskflow.taskflow.entity.User;
 import com.taskflow.taskflow.service.UserService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -41,17 +44,17 @@ public class MeController {
 
     // PATCH - update own name/email
     @PatchMapping
-    public ResponseEntity<UserResponse> updateMe(@RequestBody UpdateUserRequest request){
+    public ResponseEntity<UpdateUserResponse> updateMe(@Valid @RequestBody UpdateUserRequest request){
         User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        return ResponseEntity.ok(mapToResponse(userService.updateUser(currentUser.getId(), request)));
+        return ResponseEntity.ok(userService.updateUser(currentUser.getId(), request));
     }
 
     // PATCH - update own password
     @PatchMapping("/password")
-    public ResponseEntity<Void> updateMyPassword(@RequestBody UpdateUserPasswordRequest request) {
+    public ResponseEntity<AuthResponse> updateMyPassword(@Valid @RequestBody UpdateUserPasswordRequest request) {
         User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        userService.updateUserPassword(currentUser.getId(), request);
+        AuthResponse response = userService.updateUserPassword(currentUser.getId(), request);
         // this return type is needed to return a successful HTTP response without a body
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(response);
     }
 }

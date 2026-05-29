@@ -16,7 +16,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
-import static org.mockito.Mockito.when;
+//import org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class TeamServiceImplTest {
@@ -80,7 +80,7 @@ class TeamServiceImplTest {
         expectedTeam.setName("Engineering");
         expectedTeam.setDescription("Engineering team");
 
-        when(teamRepository.findById(1)).thenReturn(Optional.of(expectedTeam));
+        Mockito.when(teamRepository.findById(1)).thenReturn(Optional.of(expectedTeam));
 
         Team actualTeam = teamService.findById(1);
 
@@ -89,7 +89,7 @@ class TeamServiceImplTest {
 
     @Test
     void shouldThrowResourceNotFoundExceptionWhenTeamDoesNotExist() {
-        when(teamRepository.findById(1)).thenReturn(Optional.empty());
+        Mockito.when(teamRepository.findById(1)).thenReturn(Optional.empty());
 
         Assertions.assertThrows(ResourceNotFoundException.class, () -> teamService.findById(1));
     }

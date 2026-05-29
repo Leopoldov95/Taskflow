@@ -2,12 +2,16 @@ package com.taskflow.taskflow.service;
 
 import com.taskflow.taskflow.dao.RoleRepository;
 import com.taskflow.taskflow.dao.UserRepository;
+import com.taskflow.taskflow.dto.auth.AuthResponse;
 import com.taskflow.taskflow.dto.user.UpdateUserPasswordRequest;
 import com.taskflow.taskflow.dto.user.UpdateUserRequest;
+import com.taskflow.taskflow.dto.user.UpdateUserResponse;
+import com.taskflow.taskflow.dto.user.UserResponse;
 import com.taskflow.taskflow.entity.User;
 import com.taskflow.taskflow.exception.BadRequestException;
 import com.taskflow.taskflow.exception.DuplicateResourceException;
 import com.taskflow.taskflow.exception.ResourceNotFoundException;
+import com.taskflow.taskflow.security.JwtService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -18,10 +22,12 @@ import java.util.Optional;
 @Service
 public class UserServiceImpl implements UserService {
     private UserRepository userRepository;
+    private JwtService jwtService;
 
     @Autowired
-    public UserServiceImpl(UserRepository userRepository) {
+    public UserServiceImpl(UserRepository userRepository, JwtService jwtService) {
         this.userRepository = userRepository;
+        this.jwtService = jwtService;
     }
 
     @Autowired
@@ -56,8 +62,9 @@ public class UserServiceImpl implements UserService {
 
     // Update user fields
     @Override
-    public User updateUser(int id, UpdateUserRequest request) {
+    public UpdateUserResponse updateUser(int id, UpdateUserRequest request) {
         User user = userRepository.findById(id).orElseThrow(() -> new RuntimeException("Did not find user with id: " + id));
+        boolean isEmailUpdated = false;
 
         if (request.getFirstName() != null) user.setFirstName(request.getFirstName());
         if (request.getLastName() != null) user.setLastName(request.getLastName());
@@ -70,14 +77,27 @@ public class UserServiceImpl implements UserService {
                 );
             }
             user.setEmail(request.getEmail());
+            isEmailUpdated = true;
         }
+
         userRepository.save(user);
-        return user;
+
+        // create new UserResponse
+        UserResponse userResponse = new UserResponse(
+                user.getId(), user.getFirstName(),
+                user.getLastName(), user.getEmail(), user.isActive()
+        );
+
+        if (isEmailUpdated) {
+            return new UpdateUserResponse(userResponse, jwtService.generateToken(user));
+        }
+
+        return new UpdateUserResponse(userResponse);
     }
 
     // Update User password
     @Override
-    public void updateUserPassword(int id, UpdateUserPasswordRequest request) {
+    public AuthResponse updateUserPassword(int id, UpdateUserPasswordRequest request) {
         User user = userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Did not find user with id: " + id));
 
         if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
@@ -90,6 +110,8 @@ public class UserServiceImpl implements UserService {
 
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         userRepository.save(user);
+        String token = jwtService.generateToken(user);
+        return new AuthResponse(token);
     }
 
 
