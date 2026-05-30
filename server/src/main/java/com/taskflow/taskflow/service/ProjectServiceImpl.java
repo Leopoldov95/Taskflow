@@ -8,6 +8,7 @@ import com.taskflow.taskflow.dto.project.UpdateProjectRequest;
 import com.taskflow.taskflow.entity.Project;
 import com.taskflow.taskflow.entity.Team;
 import com.taskflow.taskflow.entity.User;
+import com.taskflow.taskflow.exception.DuplicateResourceException;
 import com.taskflow.taskflow.exception.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -64,6 +65,11 @@ public class ProjectServiceImpl implements ProjectService {
 
         Team team = teamRepository.findById(teamId)
                 .orElseThrow(() -> new ResourceNotFoundException("Team not found: " + teamId));
+
+        // check for duplicate project key within the team
+        if (projectRepository.existsByTeamIdAndProjectKey(teamId, project.getProjectKey())) {
+            throw new DuplicateResourceException("Project key '" + project.getProjectKey() + "' already exists in this team");
+        }
 
         Project newProject = new Project();
         newProject.setName(project.getName());

@@ -8,4 +8,5 @@ import java.util.List;
 public interface ProjectRepository extends JpaRepository<Project, Integer> {
     // Will only fetch multiple projects when given team is
     List<Project> findAllByTeamId(int teamId);
+    boolean existsByTeamIdAndProjectKey(int teamId, String projectKey);
 }

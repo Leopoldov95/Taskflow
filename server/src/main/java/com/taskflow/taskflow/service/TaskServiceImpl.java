@@ -32,6 +32,7 @@ public class TaskServiceImpl implements TaskService {
     private TeamMemberRepository teamMemberRepository;
     private TeamAccessService teamAccessService;
     private AuthService authService;
+    private UserRepository userRepository;
 
     @Autowired
     public TaskServiceImpl(TaskRepository taskRepository,
@@ -40,6 +41,7 @@ public class TaskServiceImpl implements TaskService {
                            TeamMemberRepository teamMemberRepository,
                            TeamAccessService teamAccessService,
                            AuthService authService,
+                           UserRepository userRepository,
                            TaskCommentRepository taskCommentRepository) {
         this.taskRepository = taskRepository;
         this.projectRepository = projectRepository;
@@ -47,6 +49,7 @@ public class TaskServiceImpl implements TaskService {
         this.teamMemberRepository = teamMemberRepository;
         this.teamAccessService = teamAccessService;
         this.authService = authService;
+        this.userRepository = userRepository;
         this.taskCommentRepository = taskCommentRepository;
     }
 
@@ -125,6 +128,20 @@ public class TaskServiceImpl implements TaskService {
             newTask.setPriority(request.getPriority());
         }
 
+        if (request.getAssignee() != null) {
+            // ensure user exists
+            User assignee = userRepository.findById(request.getAssignee())
+                    .orElseThrow(() -> new ResourceNotFoundException("User with id not found: " + request.getAssignee()));
+
+            // ensure user is part of the team
+            if (!teamAccessService.isTeamMember(project.getTeam().getId(), assignee.getId())) {
+                throw new AccessDeniedException("Assignee does not belong to team");
+            }
+
+            // set assignee
+            newTask.setAssignee(assignee);
+        }
+
         // no need to handle status, by default goes to BACKLOG
 
         return taskRepository.save(newTask);
@@ -154,6 +171,19 @@ public class TaskServiceImpl implements TaskService {
         if (request.getStatus() != null) task.setStatus(request.getStatus());
         if (request.getTitle() != null) task.setTitle(request.getTitle());
         if (request.getDescription() != null) task.setDescription(request.getDescription());
+        if (request.getAssignee() != null) {
+            // ensure user exists
+            User assignee = userRepository.findById(request.getAssignee())
+                    .orElseThrow(() -> new ResourceNotFoundException("User with id not found: " + request.getAssignee()));
+
+            // ensure user is part of the team
+            if (!teamAccessService.isTeamMember(task.getTeam().getId(), assignee.getId())) {
+                throw new AccessDeniedException("Assignee does not belong to team");
+            }
+
+            // set assignee
+            task.setAssignee(assignee);
+        }
 
         return taskRepository.save(task);
     }
@@ -168,7 +198,12 @@ public class TaskServiceImpl implements TaskService {
         // ensure user is a member of the Team owning the task
         teamAccessService.validateTeamAccess(task.getTeam().getId(), currentUser.getId());
 
-        // remove form BD
+        // ensure user is owner of task
+        if (task.getCreatedBy().getId() != currentUser.getId()) {
+            throw new AccessDeniedException("Only task creator can delete tasks");
+        }
+
+        // remove form DB
         taskRepository.delete(task);
     }
 

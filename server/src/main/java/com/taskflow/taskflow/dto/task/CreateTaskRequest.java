@@ -16,7 +16,7 @@ public class CreateTaskRequest {
     @Size(max = 1500, message = "Description cannot exceed 1500 characters")
     private String description;
 
-    private int assignee; // Here we want the User id as the DB accepts Integer
+    private Integer assignee; // Here we want the User id as the DB accepts Integer
 
     private TaskPriority priority;
 
@@ -41,11 +41,11 @@ public class CreateTaskRequest {
         this.description = description;
     }
 
-    public int getAssignee() {
+    public Integer getAssignee() {
         return assignee;
     }
 
-    public void setAssignee(int assignee) {
+    public void setAssignee(Integer assignee) {
         this.assignee = assignee;
     }
 
