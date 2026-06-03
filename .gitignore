@@ -63,3 +63,4 @@ build/
 
 ### App Files ###
 /server/**/application.properties
+/server/.env

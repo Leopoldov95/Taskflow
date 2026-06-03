@@ -82,8 +82,8 @@ public class AppSecurityConfig {
                 .requestMatchers("/api/v1/me/**").authenticated()
 
                 // User routes — admin only
-                .requestMatchers("/api/v1/users").hasRole("ADMIN")
-                .requestMatchers("/api/v1/users/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.GET, "/api/users/**").authenticated()
+                .requestMatchers(HttpMethod.DELETE, "/api/users/**").hasRole("ADMIN")
 
                 // Any authenticated user can read anything
                 .requestMatchers(HttpMethod.GET, "/api/v1/**").authenticated()
