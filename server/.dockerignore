@@ -23,6 +23,7 @@ Thumbs.db
 Dockerfile
 docker-compose.yml
 .dockerignore
+docker-compose.override.yaml
 
 # Logs
 *.log
