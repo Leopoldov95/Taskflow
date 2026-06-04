@@ -71,7 +71,10 @@ public class AppSecurityConfig {
                 // Allow all to access Swagger API
                 .requestMatchers(
                         "/swagger-ui/**",
-                        "/v3/api-docs/**"
+                        "/swagger-ui.html",
+                        "/v3/api-docs/**",
+                        "/v3/api-docs.yaml",
+                        "/webjars/**"
                 ).permitAll()
                 // Login/register endpoints — no token needed (e.g. how would we
                 // have a token before logging in?)

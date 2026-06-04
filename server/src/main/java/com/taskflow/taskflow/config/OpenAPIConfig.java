@@ -17,7 +17,8 @@ import org.springframework.context.annotation.Configuration;
                 title = "TaskFlow API",
                 version = "1.0",
                 description = "TaskFlow backend API"
-        )
+        ),
+        security = @io.swagger.v3.oas.annotations.security.SecurityRequirement(name = "bearerAuth")
 )
 @SecurityScheme(
         name = "bearerAuth",
