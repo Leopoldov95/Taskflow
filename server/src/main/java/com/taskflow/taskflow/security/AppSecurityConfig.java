@@ -76,6 +76,8 @@ public class AppSecurityConfig {
                         "/v3/api-docs.yaml",
                         "/webjars/**"
                 ).permitAll()
+                // API welcome page
+                .requestMatchers("/").permitAll()
                 // Login/register endpoints — no token needed (e.g. how would we
                 // have a token before logging in?)
                 .requestMatchers("/api/v1/auth/**").permitAll()
