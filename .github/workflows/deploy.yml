@@ -17,7 +17,7 @@ jobs:
 
       - name: Build and push image
         run: |
-          docker build -t ${{ secrets.DOCKER_USERNAME }}/taskflow-server:latest .
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/taskflow-server:latest ./server
           docker push ${{ secrets.DOCKER_USERNAME }}/taskflow-server:latest
 
       - name: Deploy to VPS
