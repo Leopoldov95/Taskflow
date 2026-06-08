@@ -12,8 +12,11 @@ import { useEffect } from 'react'
 import '../styles.css'
 import { Toaster } from 'sonner'
 import { getToken, removeToken, validateToken } from '@/api/auth'
+import { AuthProvider } from '#/provider/AuthProvider'
+import AppLayout from '#/components/AppLayout'
 
 const queryClient = new QueryClient()
+console.log('Root component loaded')
 
 export const Route = createRootRoute({
   component: RootComponent,
@@ -54,21 +57,31 @@ function RootComponent() {
     checkAuth()
   }, [location.pathname, navigate])
 
+  const isAuthRoute = location.pathname.startsWith('/auth')
+
   return (
     <QueryClientProvider client={queryClient}>
-      <Outlet />
-      <TanStackDevtools
-        config={{
-          position: 'bottom-right',
-        }}
-        plugins={[
-          {
-            name: 'TanStack Router',
-            render: <TanStackRouterDevtoolsPanel />,
-          },
-        ]}
-      />
-      <Toaster />
+      <AuthProvider>
+        {isAuthRoute ? (
+          <Outlet />
+        ) : (
+          <AppLayout>
+            <Outlet />
+          </AppLayout>
+        )}
+        <TanStackDevtools
+          config={{
+            position: 'bottom-right',
+          }}
+          plugins={[
+            {
+              name: 'TanStack Router',
+              render: <TanStackRouterDevtoolsPanel />,
+            },
+          ]}
+        />
+        <Toaster />
+      </AuthProvider>
     </QueryClientProvider>
   )
 }

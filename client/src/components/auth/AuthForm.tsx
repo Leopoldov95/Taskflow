@@ -29,7 +29,7 @@ interface AuthFormProps {
 
 const signInSchema = z.object({
   email: z.email('Invalid email address'),
-  password: z.string().min(4, 'Password must be at least 5 characters'),
+  password: z.string().min(4, 'Password must be at least 4 characters'),
 })
 
 const registerSchema = z
@@ -37,7 +37,7 @@ const registerSchema = z
     firstName: z.string().min(1, 'First name is required'),
     lastName: z.string().min(1, 'Last name is required'),
     email: z.email('Invalid email address'),
-    password: z.string().min(4, 'Password must be at least 5 characters'),
+    password: z.string().min(4, 'Password must be at least 4 characters'),
     confirmPassword: z.string().min(4, 'Password confirmation is required'),
   })
   .refine((data) => data.password === data.confirmPassword, {
@@ -72,12 +72,6 @@ export default function AuthForm({
   }, [mode, form])
 
   function handleSubmit(data: FormValues) {
-    // ensure form data is valid before calling onSubmit
-    if (!form.formState.isValid) {
-      toast.error('Please correct the errors in the form')
-      return
-    }
-
     onSubmit(data)
   }
 

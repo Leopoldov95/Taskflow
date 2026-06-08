@@ -4,6 +4,10 @@ on:
   push:
     branches:
       - main
+    tags:
+      - "v*"
+    paths:
+      - "server/**"
 
 jobs:
   deploy:
@@ -16,9 +20,13 @@ jobs:
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
       - name: Build and push image
+        working-directory: ./server
         run: |
-          docker build -t ${{ secrets.DOCKER_USERNAME }}/taskflow-server:latest ./server
+          VERSION=${GITHUB_REF_NAME:-latest}
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/taskflow-server:latest \
+                       -t ${{ secrets.DOCKER_USERNAME }}/taskflow-server:$VERSION .
           docker push ${{ secrets.DOCKER_USERNAME }}/taskflow-server:latest
+          docker push ${{ secrets.DOCKER_USERNAME }}/taskflow-server:$VERSION
 
       - name: Deploy to VPS
         uses: appleboy/ssh-action@v0.1.7

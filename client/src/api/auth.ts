@@ -15,7 +15,15 @@ export type AuthResponse = {
   token: string
 }
 
-const API_BASE_URL = 'http://localhost:8080/api'
+export type UserResponse = {
+  id: number
+  firstName: string
+  lastName: string
+  email: string
+  isActive: boolean
+}
+
+const API_BASE_URL = 'http://localhost:8080/api/v1'
 const TOKEN_STORAGE_KEY = 'taskflow_jwt'
 
 // Helper function to handle JSON responses and errors
@@ -101,6 +109,11 @@ export async function validateToken(): Promise<boolean> {
   } catch {
     return false
   }
+}
+
+// Function to get current user details
+export async function getMe(): Promise<UserResponse> {
+  return fetchWithAuth<UserResponse>('/me')
 }
 
 // Utility function to make authenticated API calls with the token automatically included

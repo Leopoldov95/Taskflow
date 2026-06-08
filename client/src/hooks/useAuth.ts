@@ -1,6 +1,7 @@
 import { useMutation } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { login as loginApi, register as registerApi } from '@/api/auth'
+import { useAuth as useAuthContext } from '@/provider/AuthProvider'
 
 type LoginData = {
   email: string
@@ -15,9 +16,14 @@ type RegisterData = {
 }
 
 export function useAuth() {
+  const { login: contextLogin } = useAuthContext()
+
   const loginMutation = useMutation({
     mutationFn: async (data: LoginData) => {
-      return loginApi(data)
+      const response = await loginApi(data)
+      // Store user details in context after successful login
+      await contextLogin(response.token)
+      return response
     },
     onSuccess: () => {
       toast.success('Successfully signed in!')
@@ -34,7 +40,10 @@ export function useAuth() {
 
   const registerMutation = useMutation({
     mutationFn: async (data: RegisterData) => {
-      return registerApi(data)
+      const response = await registerApi(data)
+      // Store user details in context after successful registration
+      await contextLogin(response.token)
+      return response
     },
     onSuccess: () => {
       toast.success('Account created successfully!')
